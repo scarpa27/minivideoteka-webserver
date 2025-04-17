@@ -3,6 +3,7 @@ package hr.tvz.tim2.webserver.dto;
 import hr.tvz.tim2.webserver.domain.Creator;
 import hr.tvz.tim2.webserver.domain.Movie;
 import hr.tvz.tim2.webserver.domain.Person;
+import hr.tvz.tim2.webserver.stock.logic.StockEntity;
 
 public class DtoMapper {
     public static MovieDto toDto(Movie movie) {
@@ -40,5 +41,12 @@ public class DtoMapper {
          }
 
          return dto;
+    }
+
+    public static StockDto toDto(StockEntity stock) {
+        var dto = new StockDto();
+        dto.setMovieId(stock.getId());
+        dto.setStock(stock.getQuantity());
+        return dto;
     }
 }
