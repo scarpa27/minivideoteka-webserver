@@ -1,8 +1,10 @@
 package hr.tvz.tim2.webserver.basket.logic;
 
 import hr.tvz.tim2.webserver.ordering.OrderService;
+import hr.tvz.tim2.webserver.security.user.ApplicationUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,9 +24,12 @@ public class BasketController {
     }
 
     @PostMapping(value = "/add")
-    public ResponseEntity<?> addItem(@RequestBody String movieId) {
+    public ResponseEntity<?> addItem(@RequestBody String movieId,
+                                     @AuthenticationPrincipal ApplicationUser user) {
+        String userName = user.getUsername();
+        System.out.printf("Username for basket: %s%n", userName);
         try {
-            basketService.addItemToBasket(69696969L, movieId);
+            basketService.addItemToBasket(userName, movieId);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }

@@ -23,22 +23,23 @@ public class StockService {
                         @Autowired MovieDbRepo movieDbRepo) {
         this.stockRepo = stockRepository;
         this.movieDbRepo = movieDbRepo;
+
+//        initialSetup();
     }
 
-    public List<StockDto> getAllStocks() {
+    public List<StockDto> getAllStocksDto() {
         return stockRepo.findAll().stream().map(DtoMapper::toDto).toList();
     }
 
-    public Optional<StockEntity> getStockEntityById(String id) {
+    public Optional<StockEntity> getStockEntityByMovie(Movie id) {
         return stockRepo.findById(id);
     }
 
-    public StockDto getStockById(String id) {
-        var stock = stockRepo.findById(id);
+    public StockDto getStockDtoById(String movieId) {
+        var movie = getMovieById(movieId);
+        var stock = movie.getStock();
 
-        if (stock.isEmpty()) throw new IllegalArgumentException("Stock not found");
-
-        return toDto(stock.get());
+        return toDto(stock);
     }
 
     @Transactional
@@ -49,48 +50,56 @@ public class StockService {
 
     @Transactional
     public void reserveMovie(String movieId) {
-        stockRepo.findById(movieId).ifPresent(stock -> {
-            var quantity = stock.getQuantity();
-            if (quantity <= 0)
-                throw new IllegalStateException("Stock quantity out of range");
-            stock.setQuantity(quantity - 1);
-        });
+        StockEntity stock = getOrCreateStockByMovieId(movieId);
+        int quantity = stock.getQuantity();
+        if (quantity <= 0)
+            throw new IllegalStateException("Stock quantity out of range");
+        stock.setQuantity(quantity - 1);
     }
 
+    @Transactional
     public void freeUpMovie(String movieId) {
-        var stck = stockRepo.findById(movieId);
-
-        stck.ifPresentOrElse(stock -> {
-            var quantity = stock.getQuantity();
-            stock.setQuantity(quantity + 1);
-            stockRepo.save(stock);
-        }, () -> {
-            var stock = new StockEntity();
-            stock.setId(movieId);
-            stock.setQuantity(1);
-            stockRepo.save(stock);
-        });
+        var stock = getOrCreateStockByMovieId(movieId);
+        int quantity = stock.getQuantity();
+        if (quantity <= 0)
+            throw new IllegalStateException("Stock quantity out of range");
+        stock.setQuantity(quantity - 1);
     }
 
+    @Transactional
     public void freeUpMovie(Movie movie) {
         String id = movie.getId();
         freeUpMovie(id);
+    }
+
+    private Movie getMovieById(String id) {
+        Optional<Movie> movie = movieDbRepo.findById(id);
+        return movie.orElseThrow();
+    }
+
+    private StockEntity getOrCreateStockByMovieId(String id) {
+        Movie movie = getMovieById(id);
+        var stock = movie.getStock();
+        if (stock == null) {
+            stock = new StockEntity();
+            stock.setMovie(movie);
+            stock.setQuantity(0);
+            movie.setStock(stock);
+            movieDbRepo.save(movie);
+        }
+        return stock;
     }
 
     private void initialSetup() {
         List<Movie> allMovies = movieDbRepo.findAll();
         allMovies.forEach(m -> {
             StockEntity stock = m.getStock();
-            if (stock == null) {
+            if (stock == null)
                 stock = new StockEntity();
-                stock.setId(m.getId());
-                stock.setQuantity(6);
-                stockRepo.save(stock);
-            }
-            else {
-                stock.setQuantity(new Random().nextInt(11));
-                stockRepo.save(stock);
-            }
+            stock.setMovie(m);
+            stock.setQuantity(new Random().nextInt(11));
+            m.setStock(stock);
+            movieDbRepo.save(m);
         });
     }
 }

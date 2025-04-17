@@ -45,7 +45,7 @@ public class DtoMapper {
 
     public static StockDto toDto(StockEntity stock) {
         var dto = new StockDto();
-        dto.setMovieId(stock.getId());
+        dto.setMovieId(stock.getMovie().getId());
         dto.setStock(stock.getQuantity());
         return dto;
     }

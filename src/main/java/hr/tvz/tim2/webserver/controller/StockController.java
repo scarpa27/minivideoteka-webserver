@@ -24,7 +24,7 @@ public class StockController {
     @Secured({"ROLE_USER"})
     public ResponseEntity<List<StockDto>> getAllStocks() {
         try {
-            return ResponseEntity.ok().body(stockService.getAllStocks());
+            return ResponseEntity.ok().body(stockService.getAllStocksDto());
         }
         catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -34,7 +34,7 @@ public class StockController {
     @GetMapping("/{movieId}")
     public ResponseEntity<StockDto> getStockById(@PathVariable String movieId) {
         try {
-            return ResponseEntity.ok().body(stockService.getStockById(movieId));
+            return ResponseEntity.ok().body(stockService.getStockDtoById(movieId));
         }
         catch (Exception e) {
             return ResponseEntity.internalServerError().build();
