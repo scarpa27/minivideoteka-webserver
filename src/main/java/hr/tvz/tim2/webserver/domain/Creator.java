@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.HashSet;
@@ -28,6 +27,9 @@ public abstract class Creator {
     @JsonProperty("name")
     private String name;
 
+    @ManyToMany(mappedBy = "creators")
+    Set<Movie> createdMovies = new HashSet<>();
+
     @Override
     public int hashCode() {
         return id.hashCode();
@@ -39,7 +41,4 @@ public abstract class Creator {
         Creator creator = (Creator) o;
         return Objects.equals(id, creator.id);
     }
-
-    @ManyToMany(mappedBy = "creators")
-    Set<Movie> createdMovies = new HashSet<>();
 }

@@ -4,22 +4,20 @@ import hr.tvz.tim2.webserver.security.domain.Authority;
 import hr.tvz.tim2.webserver.security.domain.User;
 import hr.tvz.tim2.webserver.security.user.ApplicationUser;
 import hr.tvz.tim2.webserver.security.user.UserAuthentication;
+import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import io.jsonwebtoken.*;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
 
 @Service
 public class JwtServiceImpl implements JwtService {
@@ -115,9 +113,9 @@ public class JwtServiceImpl implements JwtService {
 
     private void saveAuthentication(ApplicationUser applicationUser) {
         Authentication authentication = new UserAuthentication(applicationUser);
-        authentication = new UsernamePasswordAuthenticationToken(
-                applicationUser.getUsername(),null, applicationUser.getAuthorities()
-        );
+//        authentication = new UsernamePasswordAuthenticationToken(
+//                applicationUser.getUsername(),null, applicationUser.getAuthorities()
+//        );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         System.out.println("saveauth");
         authentication.getAuthorities().forEach(a -> System.out.println(a.getAuthority()));

@@ -17,7 +17,7 @@ public class CreatorDeserializer extends JsonDeserializer<Creator> {
         ObjectMapper mapper = (ObjectMapper) jsonParser.getCodec();
         JsonNode rootNode = mapper.readTree(jsonParser);
 
-        System.out.println(rootNode);
+//        System.out.println(rootNode);
 
         var type = rootNode.get("@type").asText();
         if (type.equals("Person")) {
