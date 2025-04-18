@@ -23,12 +23,16 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     static final String[] UNAUTHENTICATED_ENDPOINTS = new String[]{
+            "/auth",
             "/auth/**",
+            "/h2",
+            "/h2/**",
+            "/h2-console",
             "/h2-console/**",
             "/swagger-ui",
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "v3/api-docs",
+            "/v3/api-docs",
             "/movies",
             "/movies/**",
     };
@@ -49,6 +53,7 @@ public class SecurityConfig {
             auth.requestMatchers(UNAUTHENTICATED_ENDPOINTS).permitAll();
             auth.anyRequest().authenticated();
         }).httpBasic(withDefaults());
+
 
         http.sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
