@@ -2,6 +2,7 @@ package hr.tvz.tim2.webserver.chrono;
 
 import hr.tvz.tim2.webserver.basket.logic.BasketDbRepository;
 import hr.tvz.tim2.webserver.basket.logic.BasketItemDbRepository;
+import hr.tvz.tim2.webserver.basket.logic.BasketStatus;
 import hr.tvz.tim2.webserver.security.repository.UserRepository;
 import hr.tvz.tim2.webserver.stock.logic.StockService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,6 @@ public class ReservationCleanupService {
     public void cleanupExpiredBaskets() {
         var now = Instant.now();
         System.out.printf("CLeaning expired baskets at %s%n", now);
-        basketRepo.deleteAllByValidUntilDateBefore(now);
+        basketRepo.deleteAllByValidUntilDateBeforeAndStatusNot(now, BasketStatus.ORDERED);
     }
 }

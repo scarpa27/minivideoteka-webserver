@@ -37,7 +37,7 @@ public class BasketService {
 
     public BasketEntity getOrCreateActiveBasket(String userName) {
         Long userId = getUserId(userName);
-        var basket = repo.findFirstByUserIdAndValidUntilDateAfter(userId, Instant.now());
+        var basket = repo.findFirstByUserIdAndValidUntilDateAfterAndStatusNot(userId, Instant.now(), BasketStatus.ORDERED);
 
         return basket.orElseGet(() -> {
             var created = new BasketEntity();
@@ -49,6 +49,18 @@ public class BasketService {
         });
     }
 
+    public void refreshBasket(BasketEntity basket) {
+        basket.getBasketItems().forEach(item -> {
+            try {
+                addItemToBasket(basket, item.getItemId());
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        repo.saveAndFlush(basket);
+    }
+
     public BasketDto getBasketDto(String userName) {
         BasketEntity entity = getOrCreateActiveBasket(userName);
         return toDto(entity);
@@ -56,6 +68,10 @@ public class BasketService {
 
     public void addItemToBasket(String userName, String movieId) throws Exception {
         BasketEntity basket = getOrCreateActiveBasket(userName);
+        addItemToBasket(basket, movieId);
+    }
+
+    public void addItemToBasket(BasketEntity basket, String movieId) throws Exception {
         if (basket.getBasketItems().stream().noneMatch(i -> i.getItemId().equals(movieId)))
             try {
                 stockService.reserveMovie(movieId);
@@ -97,6 +113,10 @@ public class BasketService {
         repo.saveAndFlush(basket);
     }
 
+    public void saveBasketAfterOrdering(BasketEntity basket) {
+        repo.saveAndFlush(basket);
+    }
+
     private BasketItemEntity createAndPersistBasketItemEntity(String movieId) {
         var entity = new BasketItemEntity();
         entity.setReservedUntil(Instant.now().plus(ItemValidity));
@@ -105,7 +125,7 @@ public class BasketService {
         return entity;
     }
 
-    private Long getUserId(String userName) {
+    public Long getUserId(String userName) {
         return userRepo.findByUsername(userName).orElseThrow(() -> new IllegalArgumentException("User doesn't exist!")).getId();
     }
 }

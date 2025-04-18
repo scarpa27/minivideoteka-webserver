@@ -1,8 +1,8 @@
 package hr.tvz.tim2.webserver.ordering;
 
-import hr.tvz.tim2.webserver.basket.logic.BasketItemEntity;
 import hr.tvz.tim2.webserver.security.domain.User;
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
@@ -10,6 +10,7 @@ import java.util.Set;
 
 @Entity
 @NoArgsConstructor
+@Data
 public class OrderEntity {
 
 
@@ -18,12 +19,15 @@ public class OrderEntity {
     public User user = null;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    public Set<BasketItemEntity> itemIdList;
+    public Set<OrderItemEntity> itemIdList;
 
     public Instant orderDate;
+
+    public Instant returnDate;
+
+    public Boolean isReturned;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-
 }

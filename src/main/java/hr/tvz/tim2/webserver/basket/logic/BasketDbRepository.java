@@ -10,8 +10,8 @@ import java.util.Optional;
 @Transactional
 public interface BasketDbRepository extends JpaRepository<BasketEntity, Long> {
     Optional<BasketEntity> findFirstByUserIdAndStatusAndValidUntilDateAfter(Long userId, BasketStatus status, Instant date);
-    Optional<BasketEntity> findFirstByUserIdAndValidUntilDateAfter(Long userId, Instant date);
+    Optional<BasketEntity> findFirstByUserIdAndValidUntilDateAfterAndStatusNot(Long userId, Instant date, BasketStatus status);
 
     List<BasketEntity> findAllByValidUntilDateBefore(Instant date);
-    void deleteAllByValidUntilDateBefore(Instant date);
+    void deleteAllByValidUntilDateBeforeAndStatusNot(Instant date, BasketStatus status);
 }
