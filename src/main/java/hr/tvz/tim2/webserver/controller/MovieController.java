@@ -4,7 +4,6 @@ import hr.tvz.tim2.webserver.dto.CreatorDto;
 import hr.tvz.tim2.webserver.dto.DtoMapper;
 import hr.tvz.tim2.webserver.dto.MovieDto;
 import hr.tvz.tim2.webserver.service.MovieService;
-import hr.tvz.tim2.webserver.stock.logic.StockEntity;
 import hr.tvz.tim2.webserver.stock.logic.StockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -32,24 +30,44 @@ public class MovieController {
     @GetMapping
     public ResponseEntity<List<MovieDto>> getAllMovies() {
         try {
-            var allMovies = movieService.getAllMovies();
-            allMovies.forEach(movie -> {
-                var stock = movie.getStock();
-                if (stock == null) {
-                    Optional<StockEntity> optStock = stockService.getStockEntityByMovie(movie);
-                    StockEntity stockEntity = optStock.orElseGet(() -> new StockEntity(null, movie, 7));
-                    movie.setStock(stockEntity);
-                } else {
-                    if (stock.getQuantity() <= 0) {
-                        stock.setQuantity(14);
-                    }
-                }
-            });
-            movieService.saveAllMovies(allMovies);
+//            var allMovies = movieService.getAllMovies();
+//            allMovies.forEach(movie -> {
+//                var stock = movie.getStock();
+//                if (stock == null) {
+//                    Optional<StockEntity> optStock = stockService.getStockEntityByMovie(movie);
+//                    StockEntity stockEntity = optStock.orElseGet(() -> new StockEntity(null, movie, 7));
+//                    movie.setStock(stockEntity);
+//                } else {
+//                    if (stock.getQuantity() <= 0) {
+//                        stock.setQuantity(14);
+//                    }
+//                }
+//            });
+//            movieService.saveAllMovies(allMovies);
 
             return ResponseEntity
                     .ok().body(movieService.getAllMovies().stream()
                                        .map(DtoMapper::toDto).toList());
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("multi")
+    public ResponseEntity<List<MovieDto>> getSpecificMovies(@RequestParam List<String> ids) {
+        try {
+            return ResponseEntity.ok().body(movieService.getSpecificListDto(ids));
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("one")
+    public ResponseEntity<MovieDto> getSpecificMovies(@RequestParam String id) {
+        try {
+            return ResponseEntity.ok().body(movieService.getSpecificDto(id));
         }
         catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

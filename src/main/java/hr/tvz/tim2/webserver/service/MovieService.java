@@ -4,6 +4,8 @@ import hr.tvz.tim2.webserver.domain.Company;
 import hr.tvz.tim2.webserver.domain.Creator;
 import hr.tvz.tim2.webserver.domain.Movie;
 import hr.tvz.tim2.webserver.domain.Person;
+import hr.tvz.tim2.webserver.dto.DtoMapper;
+import hr.tvz.tim2.webserver.dto.MovieDto;
 import hr.tvz.tim2.webserver.persistance.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,6 +46,14 @@ public class MovieService {
 
     public List<Movie> getAllMovies() {
         return movieDbRepo.findAll().stream().toList();
+    }
+
+    public List<MovieDto> getSpecificListDto(List<String> ids) {
+        return movieDbRepo.findAllById(ids).stream().map(DtoMapper::toDto).toList();
+    }
+
+    public MovieDto getSpecificDto(String id) {
+        return movieDbRepo.findById(id).map(DtoMapper::toDto).orElse(null);
     }
 
     public List<Person> getAllActors() {

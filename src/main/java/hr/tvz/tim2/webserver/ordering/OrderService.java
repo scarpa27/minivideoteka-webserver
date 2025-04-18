@@ -1,6 +1,6 @@
 package hr.tvz.tim2.webserver.ordering;
 
-import hr.tvz.tim2.webserver.basket.logic.Basket;
+import hr.tvz.tim2.webserver.basket.logic.BasketEntity;
 import hr.tvz.tim2.webserver.basket.logic.BasketService;
 import hr.tvz.tim2.webserver.service.HistoryService;
 import hr.tvz.tim2.webserver.service.MailingService;
@@ -28,14 +28,14 @@ public class OrderService {
         this.historyService = historyService;
     }
 
-    public String confirmOrder(String userId) {
-        Basket basket = basketService.createOrGetBasketForUser(69696969L);
+    public String confirmOrder(String userName) {
+        BasketEntity basket = basketService.getOrCreateActiveBasket(userName);
         int basketSize = basket.getBasketItems().size();
 
         if (basketSize < 1)
             throw new IllegalStateException("No items in the basket");
 
-        basketService.removeAllItemsFromBasket(69696969L);
+        basketService.removeAllItemsFromBasket(userName);
 
         return mailingService.generateTrackingNumber(basketSize);
     }

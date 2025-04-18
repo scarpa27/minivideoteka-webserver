@@ -1,9 +1,12 @@
 package hr.tvz.tim2.webserver.dto;
 
+import hr.tvz.tim2.webserver.basket.logic.BasketEntity;
 import hr.tvz.tim2.webserver.domain.Creator;
 import hr.tvz.tim2.webserver.domain.Movie;
 import hr.tvz.tim2.webserver.domain.Person;
 import hr.tvz.tim2.webserver.stock.logic.StockEntity;
+
+import java.util.stream.Collectors;
 
 public class DtoMapper {
     public static MovieDto toDto(Movie movie) {
@@ -47,6 +50,18 @@ public class DtoMapper {
         var dto = new StockDto();
         dto.setMovieId(stock.getMovie().getId());
         dto.setStock(stock.getQuantity());
+        return dto;
+    }
+
+    public static BasketDto toDto(BasketEntity basket) {
+        var dto = new BasketDto();
+        var validUntil = basket.getValidUntilDate();
+        var itemsDto = basket.getBasketItems()
+                .stream().map(item -> new BasketDto.ItemDto(item.getItemId(), item.getReservedUntil()))
+                .collect(Collectors.toSet());
+        dto.setValidUntil(validUntil);
+        dto.setItems(itemsDto);
+
         return dto;
     }
 }

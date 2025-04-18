@@ -61,9 +61,7 @@ public class StockService {
     public void freeUpMovie(String movieId) {
         var stock = getOrCreateStockByMovieId(movieId);
         int quantity = stock.getQuantity();
-        if (quantity <= 0)
-            throw new IllegalStateException("Stock quantity out of range");
-        stock.setQuantity(quantity - 1);
+        stock.setQuantity(quantity + 1);
     }
 
     @Transactional
