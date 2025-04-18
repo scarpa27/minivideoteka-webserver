@@ -105,15 +105,4 @@ public class MovieController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-    @GetMapping("test/addMovies")
-    public ResponseEntity<?> addMovies() {
-        try {
-            movieService.saveAllFakeMovies();
-        }
-        catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return ResponseEntity.ok().build();
-    }
 }

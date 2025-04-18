@@ -88,7 +88,9 @@ public class StockService {
         return stock;
     }
 
-    private void initialSetup() {
+    public void initialSetup() {
+        stockRepo.deleteAll();
+        stockRepo.flush();
         List<Movie> allMovies = movieDbRepo.findAll();
         allMovies.forEach(m -> {
             StockEntity stock = m.getStock();
@@ -99,5 +101,6 @@ public class StockService {
             m.setStock(stock);
             movieDbRepo.save(m);
         });
+        movieDbRepo.flush();
     }
 }

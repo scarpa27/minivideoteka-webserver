@@ -79,11 +79,14 @@ public class MovieService {
         movieDbRepo.saveAllAndFlush(movies);
     }
 
-    public void saveAllFakeMovies() {
-        movieDbRepo.saveAllAndFlush(getAllMovies());
+    public void setUpMovies() {
+        movieDbRepo.deleteAll();
+        creatorDbRepository.deleteAll();
+        personDbRepository.deleteAll();
+        companyDbRepository.deleteAll();
 
+        assignFakeMovies();
     }
-
 
     private void assignFakeMovies() {
             List<Movie> allMovies = repository.getAllMovies();
@@ -126,6 +129,7 @@ public class MovieService {
 
             movieDbRepo.saveAllAndFlush(allMovies);
 
-            System.out.printf("There are %d movies.",movieDbRepo.count());
+            System.out.printf("There are %d movies. %d creators, %d of which are person, and %d are companies.%n",
+                              movieDbRepo.count(), creatorDbRepository.count(), personDbRepository.count(), companyDbRepository.count());
     }
 }

@@ -18,10 +18,7 @@ public class MRepository implements Repository {
     public MRepository() throws IOException {
         var inputStream = MRepository.class.getClassLoader().getResourceAsStream("top250.json");
         ObjectMapper mapper = new ObjectMapper();
-
-        allMovies = mapper.readValue(inputStream, new TypeReference<>() {
-        });
-
+        allMovies = mapper.readValue(inputStream, new TypeReference<>() {});
         allActors = new HashSet<>();
         allMovies.forEach(m -> allActors.addAll(m.getActors()));
     }
