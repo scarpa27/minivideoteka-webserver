@@ -2,8 +2,8 @@ package hr.tvz.tim2.webserver.review;
 
 import hr.tvz.tim2.webserver.dto.DtoMapper;
 import hr.tvz.tim2.webserver.dto.ReviewDto;
-import hr.tvz.tim2.webserver.ordering.OrderItemDbRepository;
-import hr.tvz.tim2.webserver.persistance.MovieDbRepo;
+import hr.tvz.tim2.webserver.ordering.repositories.OrderItemDbRepository;
+import hr.tvz.tim2.webserver.movie.repository.MovieDbRepository;
 import hr.tvz.tim2.webserver.security.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +17,12 @@ public class ReviewService {
     private final OrderItemDbRepository orderItemDbRepository;
     private final ReviewDbRepository reviewDbRepository;
     private final UserRepository userDbRepository;
-    private final MovieDbRepo movieDbRepository;
+    private final MovieDbRepository movieDbRepository;
 
     public ReviewService(@Autowired OrderItemDbRepository orderItemDbRepository,
                          @Autowired ReviewDbRepository reviewDbRepository,
                          @Autowired UserRepository userDbRepository,
-                         @Autowired MovieDbRepo movieDbRepository) {
+                         @Autowired MovieDbRepository movieDbRepository) {
         this.orderItemDbRepository = orderItemDbRepository;
         this.reviewDbRepository = reviewDbRepository;
         this.userDbRepository = userDbRepository;

@@ -5,15 +5,15 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hr.tvz.tim2.webserver.domain.Company;
-import hr.tvz.tim2.webserver.domain.Creator;
-import hr.tvz.tim2.webserver.domain.Person;
+import hr.tvz.tim2.webserver.movie.entities.CompanyEntity;
+import hr.tvz.tim2.webserver.movie.entities.CreatorEntity;
+import hr.tvz.tim2.webserver.movie.entities.PersonEntity;
 
 import java.io.IOException;
 
-public class CreatorDeserializer extends JsonDeserializer<Creator> {
+public class CreatorDeserializer extends JsonDeserializer<CreatorEntity> {
     @Override
-    public Creator deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+    public CreatorEntity deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         ObjectMapper mapper = (ObjectMapper) jsonParser.getCodec();
         JsonNode rootNode = mapper.readTree(jsonParser);
 
@@ -26,11 +26,11 @@ public class CreatorDeserializer extends JsonDeserializer<Creator> {
 
             var id = url.split("/")[2];
 
-            return new Person(id, name);
+            return new PersonEntity(id, name);
         } else if (type.equals("Organization")) {
             var url = rootNode.get("url").asText();
             var id = url.split("/")[2];
-            return new Company(id);
+            return new CompanyEntity(id);
         }
 
         return null;
