@@ -4,6 +4,11 @@ import hr.tvz.tim2.webserver.basket.logic.BasketEntity;
 import hr.tvz.tim2.webserver.domain.Creator;
 import hr.tvz.tim2.webserver.domain.Movie;
 import hr.tvz.tim2.webserver.domain.Person;
+import hr.tvz.tim2.webserver.membership.MemberEntity;
+import hr.tvz.tim2.webserver.membership.MembershipDto;
+import hr.tvz.tim2.webserver.ordering.OrderEntity;
+import hr.tvz.tim2.webserver.ordering.OrderItemEntity;
+import hr.tvz.tim2.webserver.review.ReviewEntity;
 import hr.tvz.tim2.webserver.stock.logic.StockEntity;
 
 import java.util.stream.Collectors;
@@ -61,6 +66,35 @@ public class DtoMapper {
                 .collect(Collectors.toSet());
         dto.setValidUntil(validUntil);
         dto.setItems(itemsDto);
+
+        return dto;
+    }
+
+    public static OrderConfirmDto toDto(OrderEntity o) {
+        return new OrderConfirmDto(
+                o.getOrderTracking(),
+                o.getOrderDate(),
+                o.getItemIdList().stream().map(OrderItemEntity::getItemId).collect(Collectors.toSet()),
+                o.getIsReturned(),
+                o.getReturnTracking(),
+                o.getReturnDate()
+        );
+    }
+
+    public static ReviewDto toDto(ReviewEntity review) {
+        var dto = new ReviewDto();
+        dto.setAuthor(review.getAuthor().getUsername());
+        dto.setDate(review.getDate());
+        dto.setText(review.getComment());
+        dto.setMovieId(review.getMovie().getId());
+        return dto;
+    }
+
+    public static MembershipDto toDto(MemberEntity entity) {
+        var dto = new MembershipDto();
+        dto.setValidUntil(entity.getValidUntil());
+        dto.setCardInfo(entity.getCardInfo());
+        dto.setShippingInfo(entity.getShippingInfo());
 
         return dto;
     }

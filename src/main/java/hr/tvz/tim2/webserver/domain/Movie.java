@@ -72,7 +72,7 @@ public class Movie {
     @OneToOne(mappedBy = "movie", cascade = CascadeType.ALL)
     private StockEntity stock;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ReviewEntity> reviews = new HashSet<>();
 
     /**

@@ -4,6 +4,7 @@ import hr.tvz.tim2.webserver.basket.logic.BasketEntity;
 import hr.tvz.tim2.webserver.basket.logic.BasketService;
 import hr.tvz.tim2.webserver.basket.logic.BasketStatus;
 import hr.tvz.tim2.webserver.dto.OrderConfirmDto;
+import hr.tvz.tim2.webserver.membership.MemberService;
 import hr.tvz.tim2.webserver.service.HistoryService;
 import hr.tvz.tim2.webserver.service.MailingService;
 import hr.tvz.tim2.webserver.stock.logic.StockService;
@@ -12,8 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.stream.Collectors;
+
+import static hr.tvz.tim2.webserver.dto.DtoMapper.toDto;
 
 @Service
 public class OrderService {
@@ -21,6 +23,7 @@ public class OrderService {
     private final MailingService mailingService;
     private final StockService stockService;
     private final HistoryService historyService;
+    private final MemberService memberService;
 
     private final OrderDbRepository orderDbRepository;
 
@@ -29,11 +32,13 @@ public class OrderService {
                         @Autowired MailingService mailingService,
                         @Autowired StockService stockService,
                         @Autowired HistoryService historyService,
+                        @Autowired MemberService memberService,
                         @Autowired OrderDbRepository orderDbRepository) {
         this.basketService = basketService;
         this.mailingService = mailingService;
         this.stockService = stockService;
         this.historyService = historyService;
+        this.memberService = memberService;
         this.orderDbRepository = orderDbRepository;
     }
 
@@ -41,13 +46,16 @@ public class OrderService {
     public OrderConfirmDto confirmOrder(String userName) {
         Long userId = basketService.getUserId(userName);
         boolean canUserOrder = orderDbRepository.countAllByUserIdAndIsReturnedFalse(userId) <= 0;
+        boolean isActiveMember = memberService.isUserActiveMember(userId);
 
         if (!canUserOrder)
             throw new IllegalStateException("User already has an active order");
 
+        if(!isActiveMember)
+            throw new IllegalStateException("User is not an active member");
+
         BasketEntity basket = basketService.getOrCreateActiveBasket(userName);
-        basketService.refreshBasket(basket);
-        basket = basketService.getOrCreateActiveBasket(userName);
+//        basket = basketService.refreshBasket(basket);
         int basketSize = basket.getBasketItems().size();
 
         if (basketSize < 1)
@@ -66,11 +74,13 @@ public class OrderService {
             return oi;
         }).collect(Collectors.toSet()));
         basket.setStatus(BasketStatus.ORDERED);
+        var trackingNumber = mailingService.generateTrackingNumber(basketSize);
+        order.setOrderTracking(trackingNumber);
 
         orderDbRepository.saveAndFlush(order);
 
         var orderConfirmDto = new OrderConfirmDto();
-        var trackingNumber = mailingService.generateTrackingNumber(basketSize);
+
         orderConfirmDto.setTrackingNumber(trackingNumber);
         orderConfirmDto.setOrderDate(order.getOrderDate());
         orderConfirmDto.setIsReturned(false);
@@ -79,20 +89,23 @@ public class OrderService {
         return orderConfirmDto;
     }
 
-    public String returnOrder(String userId) {
-        List<String> lastOrderMovieIds;
-        try {
-            lastOrderMovieIds = historyService.getMoviesFromUsersLastOrder(69696969L);
-            historyService.markOrderAsReturned(69696969L);
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
+    public OrderConfirmDto returnOrder(String userName) {
+        var userId = basketService.getUserId(userName);
+        var orderOptional = orderDbRepository.findFirstByUserIdAndIsReturnedFalse(userId);
 
-        for (String lastOrderMovieId : lastOrderMovieIds) {
-            stockService.freeUpMovie(lastOrderMovieId);
-        }
+        if (orderOptional.isEmpty())
+            throw new IllegalCallerException("The user has no active unreturned order.");
+        var order = orderOptional.get();
 
-        return mailingService.generateTrackingNumber(0);
+        order.setIsReturned(true);
+        order.setReturnDate(Instant.now());
+        order.getItemIdList().forEach(oi -> stockService.freeUpMovie(oi.getItemId()));
+        var trackingNumber = mailingService.generateTrackingNumber(0);
+        order.setReturnTracking(trackingNumber);
+
+        orderDbRepository.saveAndFlush(order);
+
+        return toDto(order);
     }
 }
 

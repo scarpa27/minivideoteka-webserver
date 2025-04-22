@@ -30,21 +30,6 @@ public class MovieController {
     @GetMapping
     public ResponseEntity<List<MovieDto>> getAllMovies() {
         try {
-//            var allMovies = movieService.getAllMovies();
-//            allMovies.forEach(movie -> {
-//                var stock = movie.getStock();
-//                if (stock == null) {
-//                    Optional<StockEntity> optStock = stockService.getStockEntityByMovie(movie);
-//                    StockEntity stockEntity = optStock.orElseGet(() -> new StockEntity(null, movie, 7));
-//                    movie.setStock(stockEntity);
-//                } else {
-//                    if (stock.getQuantity() <= 0) {
-//                        stock.setQuantity(14);
-//                    }
-//                }
-//            });
-//            movieService.saveAllMovies(allMovies);
-
             return ResponseEntity
                     .ok().body(movieService.getAllMovies().stream()
                                        .map(DtoMapper::toDto).toList());
