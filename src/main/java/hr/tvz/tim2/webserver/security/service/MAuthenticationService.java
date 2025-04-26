@@ -45,6 +45,7 @@ public class MAuthenticationService implements AuthenticationService {
         User user = new User(command.getUsername(), encodedPassword(command.getPassword()));
         Authority basicAuth = authRepository.findByName("ROLE_USER").orElseThrow();
         user.addAuthority(basicAuth);
+        user.setIsBanned(false);
         user = userRepository.save(user);
         return userRepository.exists(Example.of(user));
     }

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -45,6 +46,89 @@ public class MovieService {
 
     public List<MovieEntity> getAllMovies() {
         return movieDbRepository.findAll().stream().toList();
+    }
+
+    public void createOrUpdate(MovieDto dto) {
+        var entity = movieDbRepository.findById(dto.getId()).orElseGet(MovieEntity::new);
+
+        entity.setId(dto.getId());
+
+        updateCreators(dto.getCreators());
+        updatePeople(dto.getActors());
+        updatePeople(dto.getDirectors());
+
+        entity.setCreators(new HashSet<>());
+        entity.setActors(new HashSet<>());
+        entity.setDirectors(new HashSet<>());
+
+        dto.getCreators().forEach(c -> entity.getCreators().add(creatorDbRepository.getReferenceById(c.getId())));
+        dto.getActors().forEach(p -> entity.getActors().add(personDbRepository.getReferenceById(p.getId())));
+        dto.getDirectors().forEach(p -> entity.getDirectors().add(personDbRepository.getReferenceById(p.getId())));
+
+        entity.setDescription(dto.getDescription());
+        entity.setCoverImageUrl(dto.getCoverImageUrl());
+        entity.setDuration(dto.getDuration());
+        entity.setReleaseDate(dto.getReleaseDate());
+        entity.setTitle(dto.getTitle());
+
+        movieDbRepository.saveAndFlush(entity);
+    }
+
+    private void updateCreators(List<MovieDto.CreatorDto> creators) {
+        creators.forEach(dto -> {
+            CreatorEntity ce;
+            Optional<CreatorEntity> opt = creatorDbRepository.findById(dto.getId());
+            if (opt.isEmpty()) {
+                if (dto.getId().startsWith("nm")) {
+                    ce = new PersonEntity(dto.getId(), dto.getName());
+                } else if (dto.getId().startsWith("co")) {
+                    ce = new CompanyEntity(dto.getId());
+                } else {
+                    throw new IllegalArgumentException("Unknown creator type! Person id starts with 'nm' and company id starts with 'co'.");
+                }
+            } else {
+                ce = opt.get();
+            }
+            ce.setName(dto.getName());
+            creatorDbRepository.saveAndFlush(ce);
+        });
+    }
+
+    private void updatePeople(List<MovieDto.CreatorDto> people) {
+        people.forEach(dto -> {
+            PersonEntity pe;
+            Optional<PersonEntity> opt = personDbRepository.findById(dto.getId());
+            if (opt.isEmpty()) {
+                if (dto.getId().startsWith("nm")) {
+                    pe = new PersonEntity(dto.getId(), dto.getName());
+                } else {
+                    throw new IllegalArgumentException("Unknown person type! Person id starts with 'nm'.");
+                }
+            }
+            else {
+                pe = opt.get();
+            }
+            pe.setName(dto.getName());
+            personDbRepository.saveAndFlush(pe);
+        });
+    }
+
+    private void updateCompanies(List<MovieDto.CreatorDto> companies) {
+        companies.forEach(dto -> {
+            CompanyEntity ce;
+            Optional<CompanyEntity> opt = companyDbRepository.findById(dto.getId());
+            if (opt.isEmpty()) {
+                if (dto.getId().startsWith("co")) {
+                    ce = new CompanyEntity(dto.getId());
+                } else {
+                    throw new IllegalArgumentException("Unknown company type! Company id starts with 'co'.");
+                }
+            } else {
+                ce = opt.get();
+            }
+            ce.setName(dto.getName());
+            companyDbRepository.saveAndFlush(ce);
+        });
     }
 
     public List<MovieDto> getSpecificListDto(List<String> ids) {

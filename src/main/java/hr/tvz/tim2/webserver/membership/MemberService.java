@@ -9,8 +9,6 @@ import java.time.Instant;
 
 @Service
 public class MemberService {
-
-
     private final UserRepository userDbRepository;
     private final MemberDbRepository memberDbRepository;
 
@@ -77,6 +75,10 @@ public class MemberService {
     public boolean isUserMember(Long userId) {
         var optionalMember = memberDbRepository.findByUser_Id(userId);
         return optionalMember.isPresent();
+    }
+
+    public boolean isUserBanned(Long userId) {
+        return userDbRepository.findBannedById(userId);
     }
 
     private String mask(String number) {

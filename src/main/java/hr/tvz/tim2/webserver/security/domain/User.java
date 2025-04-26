@@ -48,6 +48,8 @@ public class User {
     @OneToOne(mappedBy = "user")
     private MemberEntity membership = null;
 
+    private Boolean isBanned;
+
     public User(String user,
                 String pass) {
         this.username = user;
