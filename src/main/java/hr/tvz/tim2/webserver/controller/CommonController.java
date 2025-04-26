@@ -2,10 +2,15 @@ package hr.tvz.tim2.webserver.controller;
 
 
 import hr.tvz.tim2.webserver.movie.MovieService;
+import hr.tvz.tim2.webserver.security.user.ApplicationUser;
 import hr.tvz.tim2.webserver.stock.StockService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,5 +57,24 @@ public class CommonController {
         }
 
         return ResponseEntity.ok().build();
+    }
+
+    @Hidden
+    @PreAuthorize("false")
+    @GetMapping("amIAdmin")
+    @Operation(summary = "Checks if current user is admin")
+    public ResponseEntity<Boolean> amIAdmin(@AuthenticationPrincipal ApplicationUser user) {
+        return ResponseEntity.ok(isAdmin(user));
+    }
+
+    private boolean isAdmin(ApplicationUser user) {
+        if (user == null)
+            return false;
+        if (user.getAuthorities() == null)
+            return false;
+        for (SimpleGrantedAuthority authority : user.getAuthorities())
+            if (authority.getAuthority().equals("ROLE_ADMIN"))
+                return true;
+        return false;
     }
 }
