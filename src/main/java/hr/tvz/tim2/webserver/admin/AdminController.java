@@ -2,30 +2,27 @@ package hr.tvz.tim2.webserver.admin;
 
 import hr.tvz.tim2.webserver.dto.MovieDto;
 import hr.tvz.tim2.webserver.movie.MovieService;
-import hr.tvz.tim2.webserver.stock.StockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/admin")
+@Secured({"ROLE_ADMIN"})
 public class AdminController {
 
     private final AdminService adminService;
 
     private final MovieService movieService;
-    private final StockService stockService;
 
     public AdminController(@Autowired AdminService adminService,
-                           @Autowired MovieService movieService,
-                           @Autowired StockService stockService) {
+                           @Autowired MovieService movieService) {
         this.adminService = adminService;
         this.movieService = movieService;
-        this.stockService = stockService;
     }
-
 
     @PostMapping("/movie")
     public ResponseEntity<?> saveOrUpdateMovie(@RequestBody MovieDto dto) {
