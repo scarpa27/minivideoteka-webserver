@@ -50,6 +50,18 @@ public class MAuthenticationService implements AuthenticationService {
         return userRepository.exists(Example.of(user));
     }
 
+    public boolean registerAdmin(LoginCommand command) {
+        setupAuthorities();
+        User user = new User(command.getUsername(), encodedPassword(command.getPassword()));
+        Authority basicAuth = authRepository.findByName("ROLE_USER").orElseThrow();
+        Authority adminAuth = authRepository.findByName("ROLE_ADMIN").orElseThrow();
+        user.addAuthority(basicAuth);
+        user.addAuthority(adminAuth);
+        user.setIsBanned(false);
+        user = userRepository.save(user);
+        return userRepository.exists(Example.of(user));
+    }
+
     @Override
     public boolean userExists(LoginCommand command) {
         return userRepository.findByUsername(command.getUsername()).isPresent();

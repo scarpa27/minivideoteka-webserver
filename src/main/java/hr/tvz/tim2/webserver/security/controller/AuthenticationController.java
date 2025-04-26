@@ -37,4 +37,16 @@ public class AuthenticationController {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
+
+    @PostMapping("/registerAdmin")
+    public ResponseEntity<?> registerAdmin(@Valid @RequestBody final LoginCommand command) {
+
+        if (authenticationService.userExists(command))
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+
+        if (authenticationService.registerAdmin(command))
+            return ResponseEntity.status(HttpStatus.OK).build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
 }

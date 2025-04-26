@@ -13,4 +13,5 @@ public interface AuthenticationService {
 
     boolean register(LoginCommand command);
 
+    boolean registerAdmin(LoginCommand command);
 }
