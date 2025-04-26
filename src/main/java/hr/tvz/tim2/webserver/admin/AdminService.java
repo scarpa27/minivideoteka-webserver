@@ -1,8 +1,14 @@
 package hr.tvz.tim2.webserver.admin;
 
+import hr.tvz.tim2.webserver.dto.DtoMapper;
+import hr.tvz.tim2.webserver.dto.UserDto;
+import hr.tvz.tim2.webserver.security.domain.User;
 import hr.tvz.tim2.webserver.security.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class AdminService {
@@ -26,5 +32,10 @@ public class AdminService {
 
     public void unbanUser(String username) {
         userRepository.updateBannedByUsername(username, false);
+    }
+
+    public List<UserDto> getAllUsers() {
+        List<User> entities = userRepository.findAll(Sort.by(Sort.Direction.ASC, "username"));
+        return entities.stream().map(DtoMapper::toDto).toList();
     }
 }

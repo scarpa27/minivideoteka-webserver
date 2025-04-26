@@ -1,16 +1,19 @@
 package hr.tvz.tim2.webserver.dto;
 
 import hr.tvz.tim2.webserver.basket.BasketEntity;
+import hr.tvz.tim2.webserver.membership.MemberEntity;
+import hr.tvz.tim2.webserver.membership.MembershipDto;
 import hr.tvz.tim2.webserver.movie.entities.CreatorEntity;
 import hr.tvz.tim2.webserver.movie.entities.MovieEntity;
 import hr.tvz.tim2.webserver.movie.entities.PersonEntity;
-import hr.tvz.tim2.webserver.membership.MemberEntity;
-import hr.tvz.tim2.webserver.membership.MembershipDto;
 import hr.tvz.tim2.webserver.ordering.entities.OrderEntity;
 import hr.tvz.tim2.webserver.ordering.entities.OrderItemEntity;
 import hr.tvz.tim2.webserver.review.ReviewEntity;
+import hr.tvz.tim2.webserver.security.domain.Authority;
+import hr.tvz.tim2.webserver.security.domain.User;
 import hr.tvz.tim2.webserver.stock.StockEntity;
 
+import java.time.Instant;
 import java.util.stream.Collectors;
 
 public class DtoMapper {
@@ -95,6 +98,27 @@ public class DtoMapper {
         dto.setValidUntil(entity.getValidUntil());
         dto.setCardInfo(entity.getCardInfo());
         dto.setShippingInfo(entity.getShippingInfo());
+
+        return dto;
+    }
+
+    public static UserDto toDto(User u) {
+        var dto = new UserDto();
+        dto.setId(u.getId());
+        dto.setUsername(u.getUsername());
+        dto.setAuthorities(u.getAuthorities().stream().map(Authority::getName).collect(Collectors.joining(", ")));
+
+        dto.setOrdersCount(u.getOrders().size());
+        dto.setHasActiveOrder(u.getOrders().stream().anyMatch(o -> !o.getIsReturned()));
+        dto.setReviewsCount(u.getReviews().size());
+
+        dto.setBanned(u.getIsBanned());
+        var membership = u.getMembership();
+        if (membership != null) {
+            dto.setMember(membership.getValidUntil().isAfter(Instant.now()));
+            dto.setMembershipDto(toDto(membership));
+        } else
+            dto.setMember(false);
 
         return dto;
     }

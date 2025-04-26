@@ -38,6 +38,17 @@ public class AdminController {
         }
     }
 
+    @GetMapping("/users")
+    public ResponseEntity<?> getAllUsers() {
+        try {
+            var users = adminService.getAllUsers();
+            return ResponseEntity.ok().body(users);
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
+        }
+    }
+
     @PostMapping("/ban/id/{userId}")
     public ResponseEntity<?> banUserById(@PathVariable Long userId) {
         adminService.banUser(userId);
