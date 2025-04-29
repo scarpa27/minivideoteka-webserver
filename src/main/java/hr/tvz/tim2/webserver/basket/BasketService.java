@@ -24,18 +24,15 @@ public class BasketService {
 
     private static final Duration ItemValidity = Duration.of(15, ChronoUnit.MINUTES);
     private static final Duration BasketValidity = Duration.of(3, ChronoUnit.HOURS);
-    private final BasketItemDbRepository basketItemDbRepository;
 
     public BasketService(@Autowired StockService stockService,
                          @Autowired BasketDbRepository repo,
                          @Autowired BasketItemDbRepository itemRepo,
-                         @Autowired UserRepository userRepo,
-                         BasketItemDbRepository basketItemDbRepository) {
+                         @Autowired UserRepository userRepo) {
         this.stockService = stockService;
         this.repo = repo;
         this.itemRepo = itemRepo;
         this.userRepo = userRepo;
-        this.basketItemDbRepository = basketItemDbRepository;
     }
 
     public BasketEntity getOrCreateActiveBasket(String userName) {

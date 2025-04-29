@@ -1,4 +1,4 @@
-package hr.tvz.tim2.webserver.util.deserializer;
+package hr.tvz.tim2.webserver.common.deserializer;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;

@@ -74,6 +74,10 @@ public class MovieService {
         movieDbRepository.saveAndFlush(entity);
     }
 
+    public List<MovieDto> getSpecificListDto(List<String> ids) {
+        return movieDbRepository.findAllById(ids).stream().map(DtoMapper::toDto).toList();
+    }
+
     private void updateCreators(List<MovieDto.CreatorDto> creators) {
         creators.forEach(dto -> {
             CreatorEntity ce;
@@ -129,10 +133,6 @@ public class MovieService {
             ce.setName(dto.getName());
             companyDbRepository.saveAndFlush(ce);
         });
-    }
-
-    public List<MovieDto> getSpecificListDto(List<String> ids) {
-        return movieDbRepository.findAllById(ids).stream().map(DtoMapper::toDto).toList();
     }
 
     public MovieDto getSpecificDto(String id) {
