@@ -12,6 +12,8 @@ import hr.tvz.tim2.webserver.review.ReviewEntity;
 import hr.tvz.tim2.webserver.security.domain.Authority;
 import hr.tvz.tim2.webserver.security.domain.User;
 import hr.tvz.tim2.webserver.stock.StockEntity;
+import hr.tvz.tim2.webserver.wish.WishEntity;
+import hr.tvz.tim2.webserver.wish.dto.WishDto;
 
 import java.time.Instant;
 import java.util.stream.Collectors;
@@ -120,6 +122,14 @@ public class DtoMapper {
         } else
             dto.setMember(false);
 
+        return dto;
+    }
+
+    public static WishDto toDto(WishEntity entity) {
+        var dto = new WishDto();
+        dto.setImdbId(entity.getImdbId());
+        dto.setMessage(entity.getMessage());
+        dto.setFulfilled(entity.isFulfilled());
         return dto;
     }
 }
