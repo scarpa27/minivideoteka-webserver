@@ -15,9 +15,9 @@ public interface MovieDbRepository extends JpaRepository<MovieEntity, String> {
     @Query(value = """
             
             SELECT m.*
-            FROM movie m
+            FROM MOVIE_ENTITY m
                 LEFT JOIN movie_creator_join mcj ON m.id = mcj.movie_id
-                LEFT JOIN creator c ON mcj.creator_id = c.id
+                LEFT JOIN CREATOR_ENTITY c ON mcj.creator_id = c.id
             WHERE
                 LOWER(m.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
                 OR LOWER(m.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
