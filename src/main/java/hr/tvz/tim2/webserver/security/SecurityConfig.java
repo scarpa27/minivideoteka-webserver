@@ -41,6 +41,8 @@ public class SecurityConfig {
             "/api-docs/**",
             "/movies",
             "/movies/**",
+            "/stock",
+            "/stock/**"
     };
     private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
     private final JwtFilter jwtFilter;
