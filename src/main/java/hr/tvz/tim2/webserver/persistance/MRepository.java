@@ -7,18 +7,16 @@ import hr.tvz.tim2.webserver.domain.Person;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @org.springframework.stereotype.Repository
 @Qualifier("mockRepository")
-public class MockRepository implements Repository {
+public class MRepository implements Repository {
     private final List<Movie> allMovies;
     private final Set<Person> allActors;
 
-    public MockRepository() throws IOException {
-        var inputStream = MockRepository.class.getClassLoader().getResourceAsStream("top250.json");
+    public MRepository() throws IOException {
+        var inputStream = MRepository.class.getClassLoader().getResourceAsStream("top250.json");
         ObjectMapper mapper = new ObjectMapper();
 
         allMovies = mapper.readValue(inputStream, new TypeReference<>() {
@@ -45,4 +43,17 @@ public class MockRepository implements Repository {
                 .filter(m -> m.getActors().contains(person))
                 .toList()).orElseGet(List::of);
     }
+
+    @Override
+    public List<Movie> getFilteredMovies(String keyword) {
+        Set<Movie> filteredMovies = new LinkedHashSet<>();
+
+        for (int i = 1; i<4; i++)
+            for (Movie movie : allMovies)
+                if (movie.condonesToFilterRank(keyword) == i)
+                    filteredMovies.add(movie);
+
+        return filteredMovies.stream().toList();
+    }
+
 }

@@ -12,4 +12,6 @@ public interface Repository {
     Set<Person> getAllActors();
 
     List<Movie> getAllMoviesByActor(String actorId);
+
+    List<Movie> getFilteredMovies(String keyword);
 }
