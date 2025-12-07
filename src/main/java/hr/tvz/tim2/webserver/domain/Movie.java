@@ -26,7 +26,7 @@ public class Movie {
     @JsonProperty("url") @JsonDeserialize(using = MovieIdDeserializer.class)
     private String id;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "movie_actor_join",
             joinColumns = @JoinColumn(name = "movie_id"),
@@ -35,7 +35,7 @@ public class Movie {
     @JsonProperty("actor") @JsonDeserialize(contentUsing = CreatorDeserializer.class)
     private Set<Person> actors = new HashSet<>();
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "movie_creator_join",
             joinColumns = @JoinColumn(name = "movie_id"),
@@ -60,7 +60,7 @@ public class Movie {
     @JsonProperty("description")
     private String description;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "movie_director_join",
             joinColumns = @JoinColumn(name = "movie_id"),

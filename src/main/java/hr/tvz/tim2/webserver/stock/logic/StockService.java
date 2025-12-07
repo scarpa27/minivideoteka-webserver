@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class StockService {
@@ -17,9 +18,13 @@ public class StockService {
     }
 
     public Map<String, Integer> getAllStocks() {
-        Map<String,Integer> ret = new HashMap<>();
+        Map<String, Integer> ret = new HashMap<>();
         stockRepo.findAll().forEach(s -> ret.put(s.getId(), s.getQuantity()));
         return ret;
+    }
+
+    public Optional<StockEntity> getStockEntityById(String id) {
+        return stockRepo.findById(id);
     }
 
     public Integer getStockById(String id) {
@@ -40,29 +45,29 @@ public class StockService {
     @Transactional
     public void reserveMovie(String movieId) {
         stockRepo.findById(movieId)
-                 .ifPresent(stock -> {
-                     var quantity = stock.getQuantity();
-                     if (quantity <= 0)
-                         throw new IllegalArgumentException("Stock quantity out of range");
-                     stock.setQuantity(quantity - 1);
-                 });
-    }
-
-    @Transactional
-    public void freeUpMovie(String movieId) {
-        stockRepo.findById(movieId)
-                .ifPresentOrElse(stock -> {
+                .ifPresent(stock -> {
                     var quantity = stock.getQuantity();
-                    stock.setQuantity(quantity + 1);
-                }, () -> {
-                    var stock = new StockEntity();
-                    stock.setId(movieId);
-                    stock.setQuantity(1);
-                    stockRepo.save(stock);
+                    if (quantity <= 0)
+                        throw new IllegalStateException("Stock quantity out of range");
+                    stock.setQuantity(quantity - 1);
                 });
     }
 
-    @Transactional
+    public void freeUpMovie(String movieId) {
+        var stck = stockRepo.findById(movieId);
+
+        stck.ifPresentOrElse(stock -> {
+            var quantity = stock.getQuantity();
+            stock.setQuantity(quantity + 1);
+            stockRepo.save(stock);
+        }, () -> {
+            var stock = new StockEntity();
+            stock.setId(movieId);
+            stock.setQuantity(1);
+            stockRepo.save(stock);
+        });
+    }
+
     public void freeUpMovie(Movie movie) {
         String id = movie.getId();
         freeUpMovie(id);

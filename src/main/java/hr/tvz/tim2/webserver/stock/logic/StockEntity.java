@@ -2,12 +2,14 @@ package hr.tvz.tim2.webserver.stock.logic;
 
 import hr.tvz.tim2.webserver.domain.Movie;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class StockEntity {
