@@ -36,7 +36,7 @@ public class MovieController {
             allMovies.forEach(movie -> {
                 var stock = movie.getStock();
                 if (stock == null) {
-                    Optional<StockEntity> optStock = stockService.getStockEntityById(movie.getId());
+                    Optional<StockEntity> optStock = stockService.getStockEntityByMovie(movie);
                     StockEntity stockEntity = optStock.orElseGet(() -> new StockEntity(null, movie, 7));
                     movie.setStock(stockEntity);
                 } else {

@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.Instant;
 
 @Entity
 @NoArgsConstructor
@@ -20,7 +20,7 @@ public class BasketItemEntity {
 
     private String itemId;
 
-    private Date reservedUntil;
+    private Instant reservedUntil;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "basket_id")

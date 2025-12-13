@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,7 +21,7 @@ public class BasketEntity {
 
     private BasketStatus status;
 
-    private Date validUntilDate;
+    private Instant validUntilDate;
 
     @OneToMany(mappedBy = "basket", cascade = CascadeType.ALL, orphanRemoval = true)
     private final Set<BasketItemEntity> basketItems = new HashSet<>();
