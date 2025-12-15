@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -44,6 +45,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     return;
                 }
             } else {
+                System.out.printf("JWT token is null or empty for endpoint: %s%n", request.getRequestURI());
                 unauthorized(response);
                 return;
             }
@@ -66,10 +68,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private boolean isEndpointAllowingUnauthenticatedAccess(HttpServletRequest request) {
         String uri = request.getRequestURI();
+
+        var pathMatcher = new AntPathMatcher();
         var isAllowed = Arrays.stream(SecurityConfig.UNAUTHENTICATED_ENDPOINTS)
-                     .toList()
-                     .stream()
-                     .anyMatch(endpoint -> uri.contains(endpointWithoutWildcard(endpoint)));
+                .anyMatch(endpoint -> pathMatcher.match(endpoint, uri));
+        System.out.printf("Checking if %s is unauthenticated endpoint%nIt is allowed =%b%n", uri, isAllowed);
         return isAllowed;
     }
 

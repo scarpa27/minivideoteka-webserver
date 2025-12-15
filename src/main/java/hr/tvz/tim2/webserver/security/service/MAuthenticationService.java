@@ -20,9 +20,7 @@ public class MAuthenticationService implements AuthenticationService {
     private final UserRepository userRepository;
     private final AuthorityRepository authRepository;
 
-    public MAuthenticationService(@Autowired JwtService jwtService,
-                                  @Autowired UserRepository userRepository,
-                                  @Autowired AuthorityRepository authRepository) {
+    public MAuthenticationService(@Autowired JwtService jwtService, @Autowired UserRepository userRepository, @Autowired AuthorityRepository authRepository) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.authRepository = authRepository;
@@ -36,14 +34,15 @@ public class MAuthenticationService implements AuthenticationService {
             return Optional.empty();
         }
 
-        return Optional.of(
-                new LoginDTO(jwtService.createJwt(user.get())));
+        return Optional.of(new LoginDTO(jwtService.createJwt(user.get())));
     }
 
     @Override
     public boolean register(LoginCommand command) {
+        setupAuthorities();
         User user = new User(command.getUsername(), encodedPassword(command.getPassword()));
-        Authority basicAuth = authRepository.getReferenceById(2L);
+        Authority basicAuth = authRepository.findByName("ROLE_USER").orElseThrow();
+//        basicAuth.getUsers().add(user);
         user.addAuthority(basicAuth);
         user = userRepository.save(user);
         return userRepository.exists(Example.of(user));
@@ -55,19 +54,30 @@ public class MAuthenticationService implements AuthenticationService {
     }
 
     private boolean isMatchingPassword(String rawPassword, String encryptedPassword) {
-        Pbkdf2PasswordEncoder encoder = new Pbkdf2PasswordEncoder(rawPassword,
-                128,
-                10,
-                Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA1);
+        Pbkdf2PasswordEncoder encoder = new Pbkdf2PasswordEncoder(rawPassword, 128, 10, Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA1);
         return encoder.matches(rawPassword, encryptedPassword);
     }
 
     private String encodedPassword(String raw) {
-        Pbkdf2PasswordEncoder encoder = new Pbkdf2PasswordEncoder(
-                raw,
-                128,
-                10,
-                Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA1);
+        Pbkdf2PasswordEncoder encoder = new Pbkdf2PasswordEncoder(raw, 128, 10, Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA1);
         return encoder.encode(raw);
+    }
+
+    private void setupAuthorities() {
+        authRepository.findByName("ROLE_ADMIN").ifPresentOrElse(x -> {
+        }, () -> {
+            var admin = new Authority();
+            admin.setName("ROLE_ADMIN");
+            authRepository.save(admin);
+        });
+
+        authRepository.findByName("ROLE_USER").ifPresentOrElse(x -> {
+        }, () -> {
+            var user = new Authority();
+            user.setName("ROLE_USER");
+            authRepository.save(user);
+        });
+
+        authRepository.flush();
     }
 }
