@@ -10,6 +10,9 @@ public interface BasketItemDbRepository extends JpaRepository<BasketItemEntity, 
     Set<BasketItemEntity> findAllByBasketAndReservedUntilBefore(BasketEntity basketId, Instant date);
 
     Set<BasketItemEntity> findAllByReservedUntilBefore(Instant date);
+
     void deleteAllByReservedUntilBefore(Instant date);
+
+    void deleteAllByBasketIsNull();
 
 }
