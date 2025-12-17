@@ -23,6 +23,8 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     static final String[] UNAUTHENTICATED_ENDPOINTS = new String[]{
+            "/common",
+            "/common/**",
             "/auth",
             "/auth/**",
             "/h2",
