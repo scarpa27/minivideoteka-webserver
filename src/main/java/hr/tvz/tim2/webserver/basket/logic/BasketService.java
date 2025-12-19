@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static hr.tvz.tim2.webserver.dto.DtoMapper.toDto;
@@ -27,7 +29,8 @@ public class BasketService {
     public BasketService(@Autowired StockService stockService,
                          @Autowired BasketDbRepository repo,
                          @Autowired BasketItemDbRepository itemRepo,
-                         @Autowired UserRepository userRepo, BasketItemDbRepository basketItemDbRepository) {
+                         @Autowired UserRepository userRepo,
+                         BasketItemDbRepository basketItemDbRepository) {
         this.stockService = stockService;
         this.repo = repo;
         this.itemRepo = itemRepo;
@@ -49,7 +52,7 @@ public class BasketService {
         });
     }
 
-    public void refreshBasket(BasketEntity basket) {
+    public BasketEntity refreshBasket(BasketEntity basket) {
         basket.getBasketItems().forEach(item -> {
             try {
                 addItemToBasket(basket, item.getItemId());
@@ -58,7 +61,7 @@ public class BasketService {
                 throw new RuntimeException(e);
             }
         });
-        repo.saveAndFlush(basket);
+        return basket;
     }
 
     public BasketDto getBasketDto(String userName) {
@@ -72,7 +75,9 @@ public class BasketService {
     }
 
     public void addItemToBasket(BasketEntity basket, String movieId) throws Exception {
-        if (basket.getBasketItems().stream().noneMatch(i -> i.getItemId().equals(movieId)))
+        // If the movie is not already in the basket.
+        if (basket.getBasketItems().stream().noneMatch(i -> i.getItemId().equals(movieId))) {
+            System.out.println("Adding item that doesn't exist.");
             try {
                 stockService.reserveMovie(movieId);
             }
@@ -81,25 +86,50 @@ public class BasketService {
                 System.out.printf(message);
                 throw new Exception(message, e);
             }
+            BasketItemEntity item = createAndPersistBasketItemEntity(movieId);
+            item.setBasket(basket);
+            basket.getBasketItems().add(item);
+        }
+        // If the movie is already in the basket.
         else {
-            basket.getBasketItems().stream().filter(i -> i.getItemId().equals(movieId)).forEach(item -> {
-                basketItemDbRepository.delete(item);
-                basket.getBasketItems().remove(item);
-                basketItemDbRepository.flush();
+            System.out.println("Adding item that already exists.");
+            Optional<BasketItemEntity> item = basket.getBasketItems().stream()
+                    .filter(i -> i.getItemId().equals(movieId))
+                    .max(Comparator.comparing(BasketItemEntity::getReservedUntil));
+
+            if (item.isEmpty()) throw new IllegalStateException("Item should be in basket, but is not found.");
+            var itemEntity = item.get();
+
+            // If the movie is expired, try to reserve it again.
+            if (itemEntity.getReservedUntil().isBefore(Instant.now())) {
+                System.out.println("This item exists in the basket, but it is expired. Trying to reserve it again.");
+                try {
+                    stockService.reserveMovie(movieId);
+                }
+                catch (Exception e) {
+                    String message = String.format("Movie with id=%s could not be reserved again, because it is not available in the stock anymore: %s", movieId, e.getMessage());
+                    System.out.printf(message);
+                    throw new Exception(message, e);
+                }
+            }
+
+            // Update expiration date for existing itemEntity in the basket.
+            System.out.println("Update expiration date for existing itemEntity in the basket.");
+            basket.getBasketItems().stream().filter(i -> i.getItemId().equals(movieId)).forEach(i -> {
+                i.setReservedUntil(Instant.now().plus(ItemValidity));
             });
         }
-        BasketItemEntity item = createAndPersistBasketItemEntity(movieId);
-        item.setBasket(basket);
-        basket.getBasketItems().add(item);
+        // Add a new itemEntity to the basket.
         basket.setValidUntilDate(Instant.now().plus(BasketValidity));
+        System.out.println("Adding new itemEntity to the basket.");
         repo.saveAndFlush(basket);
     }
 
     public void removeItemFromBasket(String userName, String movieId) {
-        stockService.freeUpMovie(movieId);
-
         BasketEntity basket = getOrCreateActiveBasket(userName);
-        basket.getBasketItems().removeIf(item -> item.getItemId().equals(movieId));
+        var didRemove = basket.getBasketItems().removeIf(item -> item.getItemId().equals(movieId));
+        if (didRemove)
+            stockService.freeUpMovie(movieId);
         basket.setValidUntilDate(Instant.now().plus(BasketValidity));
         repo.saveAndFlush(basket);
     }
@@ -107,7 +137,7 @@ public class BasketService {
     public void removeAllItemsFromBasket(String userName) {
         BasketEntity basket = getOrCreateActiveBasket(userName);
         var allItemIds = basket.getBasketItems().stream().map(BasketItemEntity::getItemId).collect(Collectors.toSet());
-        allItemIds.forEach(stockService::freeUpMovie);
+        allItemIds.forEach(stockService::freeUpMovie); // this could free up expired movie.
         basket.getBasketItems().clear();
         basket.setValidUntilDate(Instant.now().plus(BasketValidity));
         repo.saveAndFlush(basket);

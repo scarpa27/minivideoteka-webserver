@@ -27,6 +27,9 @@ public class OrderEntity {
 
     public Boolean isReturned;
 
+    public String orderTracking;
+    public String returnTracking;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;

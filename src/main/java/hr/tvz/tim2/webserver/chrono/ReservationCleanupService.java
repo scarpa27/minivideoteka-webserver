@@ -32,7 +32,7 @@ public class ReservationCleanupService {
     public void cleanupExpiredReservations() {
         var now = Instant.now();
         System.out.printf("Cleaning expired reservations at %s%n", now);
-        itemRepo.findAllByReservedUntilBefore(now).forEach(item -> {
+        itemRepo.findAllByReservedUntilBeforeAndBasketStatusNot(now, BasketStatus.ORDERED).forEach(item -> {
             System.out.printf("Removing expired reservation for item %s%n", item.getItemId());
             stockService.freeUpMovie(item.getItemId());
             itemRepo.delete(item);

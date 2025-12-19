@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Transactional
@@ -26,4 +27,6 @@ public interface MovieDbRepo extends JpaRepository<Movie, String> {
                 CASE WHEN LOWER(m.description) LIKE LOWER(CONCAT('%', :keyword, '%')) THEN 1 ELSE 0 END DESC;
             """, nativeQuery = true)
     Set<Movie> findByKeyword(@Param("keyword") String keyword);
+
+    Optional<Movie> findFirstById(String id);
 }

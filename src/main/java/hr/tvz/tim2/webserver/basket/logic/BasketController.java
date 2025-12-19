@@ -33,10 +33,9 @@ public class BasketController {
     }
 
     @Operation(summary = """
-                    Ovaj šteka kad se naglo dodaje film kojeg baš nema. 
-                    Inače je ideja da rezervacija traje 15 min, a ako ga opet dodaš, 
-                    da se samo osvježi vrime rezervacije, al zbog nekog razloga ako klikneš dva tri puta brzo 
-                    film koji je svakako bio samo jedan na stanju, sjebe se nešto, više se nikad ni ne oslobodi film iz rezervacije. """)
+                    The movie will be reserved for 15 minutes.
+                    Adding an existing movie will just refresh it's reservation expiration.
+                    If the item is expired, reserving will be tried, but there is no guarantee the movie will still be available.""")
     @PutMapping(value = "/add/{movieId}")
     public ResponseEntity<?> addItem(@PathVariable String movieId,
                                      @AuthenticationPrincipal ApplicationUser user) {
@@ -92,18 +91,18 @@ public class BasketController {
     }
 
     @Operation(summary = """
-                    Ovo ne radi uopće. Nisan ga još implementira.""")
+                    !""")
     @PostMapping(value = "/returnLatestOrder")
     public ResponseEntity<?> returnLatestOrder(@AuthenticationPrincipal ApplicationUser user) {
         String userName = user.getUsername();
-        String trackingNumber;
+        OrderConfirmDto orderConfirm;
         try {
-            trackingNumber = orderService.returnOrder(userName);
+            orderConfirm = orderService.returnOrder(userName);
         }
         catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
 
-        return ResponseEntity.ok().body(trackingNumber);
+        return ResponseEntity.ok().body(orderConfirm);
     }
 }

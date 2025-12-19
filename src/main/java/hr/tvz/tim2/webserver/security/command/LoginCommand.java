@@ -1,8 +1,7 @@
 package hr.tvz.tim2.webserver.security.command;
 
-import lombok.Getter;
-
 import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
 
 @Getter
 public class LoginCommand {

@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
@@ -21,10 +20,13 @@ public class MemberEntity {
     @OneToOne(fetch = FetchType.EAGER)
     private User user;
 
-    private String shippingAddress;
-
     private Instant validUntil;
 
-    private BigDecimal creditsLeft;
+    private Boolean isActivated;
 
+    @Embedded
+    CardInfo cardInfo;
+
+    @Embedded
+    ShippingInfo shippingInfo;
 }
