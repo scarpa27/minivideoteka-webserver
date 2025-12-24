@@ -1,7 +1,7 @@
 package hr.tvz.tim2.webserver.review;
 
 
-import hr.tvz.tim2.webserver.domain.Movie;
+import hr.tvz.tim2.webserver.movie.entities.MovieEntity;
 import hr.tvz.tim2.webserver.security.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -29,7 +29,7 @@ public class ReviewEntity {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "movie_id")
-    private Movie movie;
+    private MovieEntity movie;
 
     private Instant date;
 }

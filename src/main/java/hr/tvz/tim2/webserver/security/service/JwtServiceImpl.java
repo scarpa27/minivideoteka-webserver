@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class JwtServiceImpl implements JwtService {
-
     private static final Logger log = LoggerFactory.getLogger(JwtServiceImpl.class);
     private static final String AUTHORITIES_KEY = "authorities";
 
@@ -33,9 +32,8 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public boolean authenticate(String token) {
-        if (isJwtInvalid(token)) {
+        if (isJwtInvalid(token))
             return false;
-        }
 
         ApplicationUser applicationUser = getUserDataFromJwt(token);
         saveAuthentication(applicationUser);
@@ -48,7 +46,7 @@ public class JwtServiceImpl implements JwtService {
             return List.of();
         }
         ApplicationUser appUser = getUserDataFromJwt(token);
-        return appUser.getAuthorities().stream().map(SimpleGrantedAuthority::getAuthority).collect(Collectors.toList());
+        return appUser.getAuthorities().stream().map(SimpleGrantedAuthority::getAuthority).toList();
     }
 
     @Override
@@ -113,11 +111,8 @@ public class JwtServiceImpl implements JwtService {
 
     private void saveAuthentication(ApplicationUser applicationUser) {
         Authentication authentication = new UserAuthentication(applicationUser);
-//        authentication = new UsernamePasswordAuthenticationToken(
-//                applicationUser.getUsername(),null, applicationUser.getAuthorities()
-//        );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        System.out.println("saveauth");
+        log.info("User {} logged in successfully.", applicationUser.getUsername());
         authentication.getAuthorities().forEach(a -> System.out.println(a.getAuthority()));
     }
 }

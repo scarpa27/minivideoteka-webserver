@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -29,7 +30,9 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
         request.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
@@ -74,9 +77,5 @@ public class JwtFilter extends OncePerRequestFilter {
                 .anyMatch(endpoint -> pathMatcher.match(endpoint, uri));
         System.out.printf("Checking if %s is unauthenticated endpoint%nIt is allowed =%b%n", uri, isAllowed);
         return isAllowed;
-    }
-
-    private String endpointWithoutWildcard(String endpoint) {
-        return endpoint.replace("**", "");
     }
 }

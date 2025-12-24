@@ -1,39 +1,39 @@
 package hr.tvz.tim2.webserver.dto;
 
-import hr.tvz.tim2.webserver.basket.logic.BasketEntity;
-import hr.tvz.tim2.webserver.domain.Creator;
-import hr.tvz.tim2.webserver.domain.Movie;
-import hr.tvz.tim2.webserver.domain.Person;
+import hr.tvz.tim2.webserver.basket.BasketEntity;
+import hr.tvz.tim2.webserver.movie.entities.CreatorEntity;
+import hr.tvz.tim2.webserver.movie.entities.MovieEntity;
+import hr.tvz.tim2.webserver.movie.entities.PersonEntity;
 import hr.tvz.tim2.webserver.membership.MemberEntity;
 import hr.tvz.tim2.webserver.membership.MembershipDto;
-import hr.tvz.tim2.webserver.ordering.OrderEntity;
-import hr.tvz.tim2.webserver.ordering.OrderItemEntity;
+import hr.tvz.tim2.webserver.ordering.entities.OrderEntity;
+import hr.tvz.tim2.webserver.ordering.entities.OrderItemEntity;
 import hr.tvz.tim2.webserver.review.ReviewEntity;
-import hr.tvz.tim2.webserver.stock.logic.StockEntity;
+import hr.tvz.tim2.webserver.stock.StockEntity;
 
 import java.util.stream.Collectors;
 
 public class DtoMapper {
-    public static MovieDto toDto(Movie movie) {
+    public static MovieDto toDto(MovieEntity entity) {
         MovieDto dto = new MovieDto();
 
-        dto.setId(movie.getId());
-        dto.setTitle(movie.getTitle());
-        dto.setReleaseDate(movie.getReleaseDate());
-        dto.setCoverImageUrl(movie.getCoverImageUrl());
-        dto.setDuration(movie.getDuration());
-        dto.setDescription(movie.getDescription());
+        dto.setId(entity.getId());
+        dto.setTitle(entity.getTitle());
+        dto.setReleaseDate(entity.getReleaseDate());
+        dto.setCoverImageUrl(entity.getCoverImageUrl());
+        dto.setDuration(entity.getDuration());
+        dto.setDescription(entity.getDescription());
 
-        dto.setActors(movie.getActors().stream()
+        dto.setActors(entity.getActors().stream()
                                 .map(a -> new MovieDto.CreatorDto(a.getId(), a.getName())).toList());
-        dto.setCreators(movie.getCreators().stream()
+        dto.setCreators(entity.getCreators().stream()
                                   .map(c -> new MovieDto.CreatorDto(c.getId(), c.getName())).toList());
-        dto.setDirectors(movie.getDirectors().stream()
+        dto.setDirectors(entity.getDirectors().stream()
                                    .map(d -> new MovieDto.CreatorDto(d.getId(), d.getName())).toList());
         return dto;
     }
 
-    public static CreatorDto toDto(Creator creator) {
+    public static CreatorDto toDto(CreatorEntity creator) {
         CreatorDto dto = new CreatorDto();
 
         dto.setId(creator.getId());
@@ -41,7 +41,7 @@ public class DtoMapper {
         dto.setCreatedMovies(creator.getCreatedMovies().stream()
                                     .map(m -> new CreatorDto.MovieDto(m.getId(), m.getTitle())).toList());
 
-         if (creator instanceof Person p) {
+         if (creator instanceof PersonEntity p) {
              dto.setStarredMovies(p.getStarredMovies().stream()
                                    .map(m -> new CreatorDto.MovieDto(m.getId(), m.getTitle())).toList());
              dto.setDirectedMovies(p.getDirectedMovies().stream()

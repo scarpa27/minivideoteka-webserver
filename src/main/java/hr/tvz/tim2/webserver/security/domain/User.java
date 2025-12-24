@@ -1,9 +1,9 @@
 package hr.tvz.tim2.webserver.security.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import hr.tvz.tim2.webserver.basket.logic.BasketEntity;
+import hr.tvz.tim2.webserver.basket.BasketEntity;
 import hr.tvz.tim2.webserver.membership.MemberEntity;
-import hr.tvz.tim2.webserver.ordering.OrderEntity;
+import hr.tvz.tim2.webserver.ordering.entities.OrderEntity;
 import hr.tvz.tim2.webserver.review.ReviewEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -48,9 +48,10 @@ public class User {
     @OneToOne(mappedBy = "user")
     private MemberEntity membership = null;
 
-    public User(String _user, String _pass) {
-        this.username = _user;
-        this.password = _pass;
+    public User(String user,
+                String pass) {
+        this.username = user;
+        this.password = pass;
     }
 
     public void addAuthority(Authority nAuth) {

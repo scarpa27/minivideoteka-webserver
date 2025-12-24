@@ -34,7 +34,9 @@ public class MAuthenticationService implements AuthenticationService {
             return Optional.empty();
         }
 
-        return Optional.of(new LoginDTO(jwtService.createJwt(user.get())));
+        String token = jwtService.createJwt(user.get());
+
+        return Optional.of(new LoginDTO(token, jwtService.getAuthorities(token)));
     }
 
     @Override
@@ -42,7 +44,6 @@ public class MAuthenticationService implements AuthenticationService {
         setupAuthorities();
         User user = new User(command.getUsername(), encodedPassword(command.getPassword()));
         Authority basicAuth = authRepository.findByName("ROLE_USER").orElseThrow();
-//        basicAuth.getUsers().add(user);
         user.addAuthority(basicAuth);
         user = userRepository.save(user);
         return userRepository.exists(Example.of(user));

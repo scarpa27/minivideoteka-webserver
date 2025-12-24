@@ -1,8 +1,8 @@
 package hr.tvz.tim2.webserver.controller;
 
 
-import hr.tvz.tim2.webserver.service.MovieService;
-import hr.tvz.tim2.webserver.stock.logic.StockService;
+import hr.tvz.tim2.webserver.movie.MovieService;
+import hr.tvz.tim2.webserver.stock.StockService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -36,10 +36,10 @@ public class CommonController {
             summary = "Initial database populate",
             description = """
                     This will populate database with 250 movies and hook up all creators.
-                    It will also randomly generate stock for each movie with between 0 and 10 items in stock.
+                    It will also randomly generate stock for each entity with between 0 and 10 items in stock.
                     No users will be created, but you should also be able to register yourself.
                     Once you are registered, you need to login and copy token from response body to upper right menu marked as "Authorize".
-                    Some endpoints allowed unauthenticated access. You can access this site and any "/movie" endpoint.
+                    Some endpoints allowed unauthenticated access. You can access this site and any "/entity" endpoint.
                     If you want to manipulate something, database is available at "/h2", user is "sa", password is empty."""
     )
     public ResponseEntity<?> setupTestEnv() {
