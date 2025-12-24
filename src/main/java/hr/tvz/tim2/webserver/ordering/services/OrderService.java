@@ -46,8 +46,13 @@ public class OrderService {
     @Transactional
     public OrderConfirmDto confirmOrder(String userName) {
         Long userId = basketService.getUserId(userName);
+
+        boolean isUserBanned = memberService.isUserBanned(userId);
         boolean canUserOrder = orderDbRepository.countAllByUserIdAndIsReturnedFalse(userId) <= 0;
         boolean isActiveMember = memberService.isUserActiveMember(userId);
+
+        if(isUserBanned)
+            throw new IllegalStateException("User is banned");
 
         if (!canUserOrder)
             throw new IllegalStateException("User already has an active order");

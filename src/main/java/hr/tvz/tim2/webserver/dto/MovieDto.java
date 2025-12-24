@@ -19,7 +19,7 @@ public class MovieDto {
     String description;
 
     @Data @AllArgsConstructor
-    static class CreatorDto {
+    public static class CreatorDto {
         String id;
         String name;
     }
