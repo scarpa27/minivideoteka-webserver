@@ -45,7 +45,7 @@ public class CommonController {
                     No users will be created, but you should also be able to register yourself.
                     Once you are registered, you need to login and copy token from response body to upper right menu marked as "Authorize".
                     Some endpoints allowed unauthenticated access. You can access this site and any "/entity" endpoint.
-                    If you want to manipulate something, database is available at "/h2", user is "sa", password is empty."""
+                    If you want to manipulate something, database is available at "/h2", user is "sa", password is empty, file is jdbc:h2:file:~/spring-boot-h2-db"""
     )
     public ResponseEntity<?> setupTestEnv() {
         try {
