@@ -1,9 +1,12 @@
 package hr.tvz.tim2.webserver.movie;
 
+import hr.tvz.tim2.webserver.common.exception.ApiError;
 import hr.tvz.tim2.webserver.dto.CreatorDto;
 import hr.tvz.tim2.webserver.dto.DtoMapper;
 import hr.tvz.tim2.webserver.dto.MovieDto;
-import hr.tvz.tim2.webserver.stock.StockService;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -15,15 +18,14 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/movies")
+@ApiResponse(responseCode = "200")
+@ApiResponse(description = "Error", content = @Content(schema = @Schema(implementation = ApiError.class)))
 public class MovieController {
-
     private final MovieService movieService;
-    private final StockService stockService;
 
     @Autowired
-    public MovieController(@Qualifier("movieService") MovieService service, StockService stockService) {
+    public MovieController(@Qualifier("movieService") MovieService service) {
         this.movieService = service;
-        this.stockService = stockService;
     }
 
     @GetMapping

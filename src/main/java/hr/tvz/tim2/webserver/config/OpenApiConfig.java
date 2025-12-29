@@ -21,4 +21,22 @@ public class OpenApiConfig {
                                 .bearerFormat("JWT")))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
     }
+
+//    @Bean
+//    public OpenApiCustomizer globalResponseCustomizer() {
+//        return openApi -> openApi.getPaths()
+//                .forEach((path, pathItem) -> pathItem.readOperations()
+//                        .forEach(operation -> {
+//            ApiResponses responses = operation.getResponses();
+//            responses.addApiResponse("default", createApiErrorResponse());
+//        }));
+//    }
+//
+//    private ApiResponse createApiErrorResponse() {
+//        return new ApiResponse()
+//                .description("Error")
+//                .content(new Content()
+//                                 .addMediaType("application/json",
+//                                               new MediaType().schema(new Schema<>().$ref("#/components/schemas/ApiError"))));
+//    }
 }

@@ -161,13 +161,18 @@ public class MovieService {
         movieDbRepository.saveAllAndFlush(movies);
     }
 
-    public void setUpMovies() throws IOException {
+    public void setUpMovies() {
         movieDbRepository.deleteAll();
         creatorDbRepository.deleteAll();
         personDbRepository.deleteAll();
         companyDbRepository.deleteAll();
 
-        assignFakeMovies();
+        try {
+            assignFakeMovies();
+        }
+        catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private void assignFakeMovies() throws IOException {

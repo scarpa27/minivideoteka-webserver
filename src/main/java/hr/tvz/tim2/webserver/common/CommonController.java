@@ -1,11 +1,15 @@
-package hr.tvz.tim2.webserver.controller;
+package hr.tvz.tim2.webserver.common;
 
 
+import hr.tvz.tim2.webserver.common.exception.ApiError;
 import hr.tvz.tim2.webserver.movie.MovieService;
 import hr.tvz.tim2.webserver.security.user.ApplicationUser;
 import hr.tvz.tim2.webserver.stock.StockService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,6 +25,8 @@ import java.time.Instant;
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/common")
+@ApiResponse(responseCode = "200")
+@ApiResponse(description = "Error", content = @Content(schema = @Schema(implementation = ApiError.class)))
 public class CommonController {
     private final MovieService movieService;
     private final StockService stockService;
@@ -47,15 +53,9 @@ public class CommonController {
                     Some endpoints allowed unauthenticated access. You can access this site and any "/entity" endpoint.
                     If you want to manipulate something, database is available at "/h2", user is "sa", password is empty, file is jdbc:h2:file:~/spring-boot-h2-db"""
     )
-    public ResponseEntity<?> setupTestEnv() {
-        try {
-            movieService.setUpMovies();
-            stockService.initialSetup();
-        }
-        catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
-
+    public ResponseEntity<Void> setupTestEnv() {
+        movieService.setUpMovies();
+        stockService.initialSetup();
         return ResponseEntity.ok().build();
     }
 
