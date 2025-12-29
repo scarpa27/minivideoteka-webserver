@@ -1,8 +1,8 @@
 package hr.tvz.tim2.webserver.stock;
 
-import hr.tvz.tim2.webserver.movie.entities.MovieEntity;
 import hr.tvz.tim2.webserver.dto.DtoMapper;
 import hr.tvz.tim2.webserver.dto.StockDto;
+import hr.tvz.tim2.webserver.movie.entities.MovieEntity;
 import hr.tvz.tim2.webserver.movie.repository.MovieDbRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import static hr.tvz.tim2.webserver.dto.DtoMapper.toDto;
 
@@ -78,8 +79,7 @@ public class StockService {
             if (stock == null)
                 stock = new StockEntity();
             stock.setMovie(m);
-//            stock.setQuantity(new Random().nextInt(11));
-            stock.setQuantity(1);
+            stock.setQuantity(new Random().nextInt(5));
             m.setStock(stock);
             movieDbRepository.save(m);
         });
