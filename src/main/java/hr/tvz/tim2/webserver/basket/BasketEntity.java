@@ -24,7 +24,7 @@ public class BasketEntity {
     private Instant validUntilDate;
 
     @OneToMany(mappedBy = "basket", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final Set<BasketItemEntity> basketItems = new HashSet<>();
+    private Set<BasketItemEntity> basketItems = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_b_id")
