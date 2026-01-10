@@ -31,5 +31,8 @@ public interface MovieDbRepository extends JpaRepository<MovieEntity, String> {
 
     Optional<MovieEntity> findFirstById(String id);
 
+    @Query(value = "SELECT m.id FROM MovieEntity m")
+    List<String> findAllIds();
+
     List<MovieEntity> findByActors_Id(String actorId);
 }
