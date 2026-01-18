@@ -19,6 +19,10 @@ import java.time.Instant;
 import java.util.stream.Collectors;
 
 public class DtoMapper {
+    private DtoMapper() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static MovieDto toDto(MovieEntity entity) {
         MovieDto dto = new MovieDto();
 
@@ -28,14 +32,28 @@ public class DtoMapper {
         dto.setCoverImageUrl(entity.getCoverImageUrl());
         dto.setDuration(entity.getDuration());
         dto.setDescription(entity.getDescription());
+        dto.setYoutubeTrailer(getYoutubeTrailer(entity));
 
         dto.setActors(entity.getActors().stream()
-                                .map(a -> new MovieDto.CreatorDto(a.getId(), a.getName())).toList());
+                              .map(a -> new MovieDto.CreatorDto(a.getId(), a.getName())).toList());
         dto.setCreators(entity.getCreators().stream()
-                                  .map(c -> new MovieDto.CreatorDto(c.getId(), c.getName())).toList());
+                                .map(c -> new MovieDto.CreatorDto(c.getId(), c.getName())).toList());
         dto.setDirectors(entity.getDirectors().stream()
-                                   .map(d -> new MovieDto.CreatorDto(d.getId(), d.getName())).toList());
+                                 .map(d -> new MovieDto.CreatorDto(d.getId(), d.getName())).toList());
         return dto;
+    }
+
+    private static MovieDto.YoutubeTrailer getYoutubeTrailer(MovieEntity entity) {
+        var trailerDto = new MovieDto.YoutubeTrailer();
+        var youtubeTrailerEntity = entity.getYoutubeTrailer();
+        if (entity.getYoutubeTrailer() != null) {
+            trailerDto.setVideoId(youtubeTrailerEntity.getVideoId());
+            trailerDto.setProvider(youtubeTrailerEntity.getProvider());
+            trailerDto.setName(youtubeTrailerEntity.getName());
+            trailerDto.setWatchUrl(youtubeTrailerEntity.getWatchUrl());
+            trailerDto.setEmbedUrl(youtubeTrailerEntity.getEmbedUrl());
+        }
+        return trailerDto;
     }
 
     public static CreatorDto toDto(CreatorEntity creator) {

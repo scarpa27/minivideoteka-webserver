@@ -193,6 +193,12 @@ public class MovieService {
             companyDbRepository.saveAllAndFlush(allCompanies);
 
             for (MovieEntity movie : allMovies) {
+                if (movie.getYoutubeTrailer() != null) {
+                    movie.getYoutubeTrailer().setMovie(movie);
+                } else {
+                    System.out.println("WARNING NO TRAILER FOUND FOR MOVIE " + movie.getTitle());
+                }
+
                 Set<CreatorEntity> movieCreators = new HashSet<>();
                 Set<PersonEntity> movieActors = new HashSet<>();
                 Set<PersonEntity> movieDirectors = new HashSet<>();

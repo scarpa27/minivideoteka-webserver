@@ -28,6 +28,11 @@ public class MovieEntity {
     @JsonProperty("url") @JsonDeserialize(using = MovieIdDeserializer.class)
     private String id;
 
+    @JsonProperty("youtubeTrailer")
+    @OneToOne(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
+    @JoinColumn(name = "youtube_trailer_video_id", referencedColumnName = "videoId")
+    private YoutubeTrailerEntity youtubeTrailer;
+
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "movie_actor_join",

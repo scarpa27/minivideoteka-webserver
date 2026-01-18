@@ -2,9 +2,11 @@ package hr.tvz.tim2.webserver.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.Duration;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class MovieDto {
@@ -18,9 +20,20 @@ public class MovieDto {
     Duration duration;
     String description;
 
+    YoutubeTrailer youtubeTrailer;
+
     @Data @AllArgsConstructor
     public static class CreatorDto {
         String id;
         String name;
+    }
+
+    @Data @NoArgsConstructor
+    public static class YoutubeTrailer {
+        String videoId;
+        String provider;
+        String name;
+        String watchUrl;
+        String embedUrl;
     }
 }
