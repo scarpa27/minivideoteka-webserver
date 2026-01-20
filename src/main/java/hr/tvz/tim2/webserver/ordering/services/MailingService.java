@@ -1,15 +1,19 @@
 package hr.tvz.tim2.webserver.ordering.services;
 
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
 
+@Slf4j
 @Service
 @NoArgsConstructor
 public class MailingService {
+    private static final Random random = new Random();
+
     public String generateTrackingNumber(int packageSize) {
-        Random random = new Random();
+        log.debug("Generating tracking number for {} package size", packageSize);
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < 2; i++) {
@@ -23,6 +27,7 @@ public class MailingService {
             sb.append(digit);
         }
 
+        log.debug("Generated tracking number {}", sb);
         return sb.toString();
     }
 }

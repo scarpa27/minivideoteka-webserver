@@ -5,12 +5,14 @@ import hr.tvz.tim2.webserver.basket.BasketItemDbRepository;
 import hr.tvz.tim2.webserver.basket.BasketStatus;
 import hr.tvz.tim2.webserver.security.repository.UserRepository;
 import hr.tvz.tim2.webserver.stock.StockService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
+@Slf4j
 @Service
 public class ReservationCleanupService {
     private final StockService stockService;
@@ -31,9 +33,9 @@ public class ReservationCleanupService {
     @Scheduled(fixedRate = 60 * 1000)
     public void cleanupExpiredReservations() {
         var now = Instant.now();
-        System.out.printf("Cleaning expired reservations at %s%n", now);
+        log.info("Cleaning expired reservations at {}", now);
         itemRepo.findAllByReservedUntilBeforeAndBasketStatusNot(now, BasketStatus.ORDERED).forEach(item -> {
-            System.out.printf("Removing expired reservation for item %s%n", item.getItemId());
+            log.info("Removing expired reservation for item {}", item.getItemId());
             stockService.freeUpMovie(item.getItemId());
             itemRepo.delete(item);
             itemRepo.flush();
@@ -43,7 +45,7 @@ public class ReservationCleanupService {
     @Scheduled(fixedRate = 60 * 1000, initialDelay = 10 * 1000)
     public void cleanupExpiredBaskets() {
         var now = Instant.now();
-        System.out.printf("CLeaning expired baskets at %s%n", now);
+        log.info("Cleaning expired baskets at {}", now);
         basketRepo.deleteAllByValidUntilDateBeforeAndStatusNot(now, BasketStatus.ORDERED);
     }
 }

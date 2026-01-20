@@ -80,30 +80,4 @@ public class SecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> web.ignoring().requestMatchers(UNAUTHENTICATED_ENDPOINTS);
     }
-
-//    protected void configure(HttpSecurity http) throws Exception {
-//
-//        http = http.csrf().disable();
-//        http = http.cors().and();
-//
-//        http = http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and();
-//
-//
-//        http.authorizeRequests().antMatchers(UNAUTHENTICATED_ENDPOINTS.toArray(new String[0]))
-//            .permitAll().anyRequest().authenticated();
-//
-//        http = http.exceptionHandling().authenticationEntryPoint((request, response, e) -> {
-//            log.error("Unauthorized request - {}", e.getMessage());
-//            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "toni " + e.getMessage());
-//        }).and();
-//
-//
-//        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-//    }
-//
-//    public void configure(WebSecurity web) {
-//        web.ignoring().antMatchers("/h2-console/**");
-//    }
-
-
 }

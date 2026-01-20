@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("order")
 @ApiResponse(responseCode = "200")
@@ -31,10 +33,12 @@ public class OrderController {
                            @Autowired HistoryService historyService) {
         this.orderService = orderService;
         this.historyService = historyService;
+        log.debug("OrderController created");
     }
 
     @GetMapping("/history")
     public ResponseEntity<List<OrderConfirmDto>> getOrdersHistory(@AuthenticationPrincipal ApplicationUser user) {
+        log.debug("Getting orders history for user: {}", user.getUsername());
         String username = user.getUsername();
         var history = historyService.getOrdersHistory(username);
         return ResponseEntity.ok().body(history);
@@ -43,6 +47,7 @@ public class OrderController {
     @Operation(summary = "Ova putanja je prominila lokaciju!!!")
     @PostMapping(value = "/completeOrder")
     public ResponseEntity<OrderConfirmDto> completeOrder(@AuthenticationPrincipal ApplicationUser user) {
+        log.debug("Confirming order for user: {}", user.getUsername());
         String userName = user.getUsername();
         var dto = orderService.confirmOrder(userName);
         return ResponseEntity.ok().body(dto);
@@ -51,6 +56,7 @@ public class OrderController {
     @Operation(summary = "Ova putanja je prominila lokaciju!!!")
     @PostMapping(value = "/returnLatestOrder")
     public ResponseEntity<OrderConfirmDto> returnLatestOrder(@AuthenticationPrincipal ApplicationUser user) {
+        log.debug("Returning latest order for user: {}", user.getUsername());
         String userName = user.getUsername();
         var orderConfirm = orderService.returnOrder(userName);
         return ResponseEntity.ok().body(orderConfirm);

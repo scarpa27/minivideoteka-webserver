@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/reviews")
@@ -24,16 +26,19 @@ public class ReviewController {
 
     public ReviewController(@Autowired ReviewService reviewService) {
         this.reviewService = reviewService;
+        log.debug("ReviewController created");
     }
 
     @GetMapping("/byMovie/{movieId}")
     public ResponseEntity<List<ReviewDto>> getReviewsByMovie(@PathVariable String movieId) {
+        log.debug("Getting reviews for movie with id: {}", movieId);
         var all = reviewService.getAllByMovieId(movieId);
         return ResponseEntity.ok().body(all);
     }
 
     @GetMapping("/byUser")
     public ResponseEntity<List<ReviewDto>> getReviewsByUser(@AuthenticationPrincipal ApplicationUser user) {
+        log.debug("Getting reviews for user: {}", user.getUsername());
         var all = reviewService.getAllByAuthorId(user.getUsername());
         return ResponseEntity.ok().body(all);
     }
@@ -41,6 +46,7 @@ public class ReviewController {
     @GetMapping("/allowedReview/{movieId}")
     public ResponseEntity<Boolean> isAllowed(@PathVariable String movieId,
                                              @AuthenticationPrincipal ApplicationUser user) {
+        log.debug("Checking if user {} can review movie with id: {}", user.getUsername(), movieId);
         String userName = user.getUsername();
         var isAllowed = reviewService.canUserReviewMovie(userName, movieId);
         return ResponseEntity.ok().body(isAllowed);
@@ -50,6 +56,7 @@ public class ReviewController {
     public ResponseEntity<Void> addReview(@Valid @RequestBody ReviewCommand command,
                                           @PathVariable String movieId,
                                           @AuthenticationPrincipal ApplicationUser user) {
+        log.debug("Saving review for movie with id: {}", movieId);
         String userName = user.getUsername();
         reviewService.saveOrUpdateReview(userName, movieId, command);
         return ResponseEntity.ok().build();
@@ -58,6 +65,7 @@ public class ReviewController {
     @DeleteMapping("/delete/{movieId}")
     public ResponseEntity<Void> deleteReview(@PathVariable String movieId,
                                              @AuthenticationPrincipal ApplicationUser user) {
+        log.debug("Deleting review for movie with id: {}", movieId);
         String userName = user.getUsername();
         reviewService.deleteReview(userName, movieId);
         return ResponseEntity.ok().build();

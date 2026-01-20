@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
 
+@Slf4j
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/common")
@@ -35,10 +37,12 @@ public class CommonController {
                             @Autowired StockService stockService) {
         this.movieService = movieService;
         this.stockService = stockService;
+        log.debug("CommonController created");
     }
 
     @GetMapping("time")
     public ResponseEntity<Instant> getServerTime() {
+        log.debug("Getting server time");
         return ResponseEntity.ok(Instant.now());
     }
 
@@ -54,6 +58,7 @@ public class CommonController {
                     If you want to manipulate something, database is available at "/h2", user is "sa", password is empty, file is jdbc:h2:file:~/spring-boot-h2-db"""
     )
     public ResponseEntity<Void> setupTestEnv() {
+        log.info("Setting up test environment");
         movieService.setUpMovies();
         stockService.initialSetup();
         return ResponseEntity.ok().build();
@@ -64,10 +69,16 @@ public class CommonController {
     @GetMapping("amIAdmin")
     @Operation(summary = "Checks if current user is admin")
     public ResponseEntity<Boolean> amIAdmin(@AuthenticationPrincipal ApplicationUser user) {
-        return ResponseEntity.ok(isAdmin(user));
+        var isAdmin = isAdmin(user);
+        if (isAdmin)
+            log.info("User {} is admin", user.getUsername());
+        else
+            log.info("User {} is not admin", user.getUsername());
+        return ResponseEntity.ok(isAdmin);
     }
 
     private boolean isAdmin(ApplicationUser user) {
+        log.debug("Checking if user is admin");
         if (user == null)
             return false;
         if (user.getAuthorities() == null)

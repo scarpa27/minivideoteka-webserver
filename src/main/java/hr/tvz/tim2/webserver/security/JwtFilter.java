@@ -6,8 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -16,12 +15,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+@Slf4j
 @Component
 public class JwtFilter extends OncePerRequestFilter {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String AUTHORIZATION_TOKEN_PREFIX = "Bearer ";
-
-    private static final Logger log = LoggerFactory.getLogger(JwtFilter.class);
 
     private final JwtService jwtService;
 
@@ -48,7 +46,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     return;
                 }
             } else {
-                System.out.printf("JWT token is null or empty for endpoint: %s%n", request.getRequestURI());
+                log.warn("JWT token is null or empty for endpoint: {}", request.getRequestURI());
                 unauthorized(response);
                 return;
             }
@@ -70,12 +68,13 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private boolean isEndpointAllowingUnauthenticatedAccess(HttpServletRequest request) {
+        log.info("Checking if {} is unauthenticated endpoint", request.getRequestURI());
         String uri = request.getRequestURI();
 
         var pathMatcher = new AntPathMatcher();
         var isAllowed = Arrays.stream(SecurityConfig.UNAUTHENTICATED_ENDPOINTS)
                 .anyMatch(endpoint -> pathMatcher.match(endpoint, uri));
-        System.out.printf("Checking if %s is unauthenticated endpoint%nIt is allowed =%b%n", uri, isAllowed);
+        log.info("It is allowed = {}", isAllowed);
         return isAllowed;
     }
 }

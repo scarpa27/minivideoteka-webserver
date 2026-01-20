@@ -1,14 +1,15 @@
 package hr.tvz.tim2.webserver.movie;
 
+import hr.tvz.tim2.webserver.dto.DtoMapper;
+import hr.tvz.tim2.webserver.dto.MovieDto;
 import hr.tvz.tim2.webserver.movie.entities.CompanyEntity;
 import hr.tvz.tim2.webserver.movie.entities.CreatorEntity;
 import hr.tvz.tim2.webserver.movie.entities.MovieEntity;
 import hr.tvz.tim2.webserver.movie.entities.PersonEntity;
-import hr.tvz.tim2.webserver.dto.DtoMapper;
-import hr.tvz.tim2.webserver.dto.MovieDto;
 import hr.tvz.tim2.webserver.movie.repository.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -19,9 +20,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@Slf4j
 @Service
 @Qualifier("movieService")
-@Setter @Getter
+@Setter
+@Getter
 public class MovieService {
     private final FakeRepository fakeRepository;
 
@@ -42,13 +45,16 @@ public class MovieService {
         this.creatorDbRepository = creatorDbRepository;
         this.personDbRepository = personDbRepository;
         this.companyDbRepository = companyDbRepository;
+        log.debug("MovieService created");
     }
 
     public List<MovieEntity> getAllMovies() {
+        log.debug("Getting all movies");
         return movieDbRepository.findAll().stream().toList();
     }
 
     public void createOrUpdate(MovieDto dto) {
+        log.debug("Saving movie with id: {}", dto.getId());
         var entity = movieDbRepository.findById(dto.getId()).orElseGet(MovieEntity::new);
 
         entity.setId(dto.getId());
@@ -75,22 +81,27 @@ public class MovieService {
     }
 
     public List<MovieDto> getSpecificListDto(List<String> ids) {
+        log.debug("Getting movies with ids: {}", ids);
         return movieDbRepository.findAllById(ids).stream().map(DtoMapper::toDto).toList();
     }
 
     private void updateCreators(List<MovieDto.CreatorDto> creators) {
+        log.debug("Updating creators: {}", creators);
         creators.forEach(dto -> {
             CreatorEntity ce;
             Optional<CreatorEntity> opt = creatorDbRepository.findById(dto.getId());
             if (opt.isEmpty()) {
                 if (dto.getId().startsWith("nm")) {
                     ce = new PersonEntity(dto.getId(), dto.getName());
-                } else if (dto.getId().startsWith("co")) {
+                }
+                else if (dto.getId().startsWith("co")) {
                     ce = new CompanyEntity(dto.getId());
-                } else {
+                }
+                else {
                     throw new IllegalArgumentException("Unknown creator type! Person id starts with 'nm' and company id starts with 'co'.");
                 }
-            } else {
+            }
+            else {
                 ce = opt.get();
             }
             ce.setName(dto.getName());
@@ -99,13 +110,15 @@ public class MovieService {
     }
 
     private void updatePeople(List<MovieDto.CreatorDto> people) {
+        log.debug("Updating people: {}", people);
         people.forEach(dto -> {
             PersonEntity pe;
             Optional<PersonEntity> opt = personDbRepository.findById(dto.getId());
             if (opt.isEmpty()) {
                 if (dto.getId().startsWith("nm")) {
                     pe = new PersonEntity(dto.getId(), dto.getName());
-                } else {
+                }
+                else {
                     throw new IllegalArgumentException("Unknown person type! Person id starts with 'nm'.");
                 }
             }
@@ -118,16 +131,19 @@ public class MovieService {
     }
 
     private void updateCompanies(List<MovieDto.CreatorDto> companies) {
+        log.debug("Updating companies: {}", companies);
         companies.forEach(dto -> {
             CompanyEntity ce;
             Optional<CompanyEntity> opt = companyDbRepository.findById(dto.getId());
             if (opt.isEmpty()) {
                 if (dto.getId().startsWith("co")) {
                     ce = new CompanyEntity(dto.getId());
-                } else {
+                }
+                else {
                     throw new IllegalArgumentException("Unknown company type! Company id starts with 'co'.");
                 }
-            } else {
+            }
+            else {
                 ce = opt.get();
             }
             ce.setName(dto.getName());
@@ -136,32 +152,39 @@ public class MovieService {
     }
 
     public MovieDto getSpecificDto(String id) {
+        log.debug("Getting movie with id: {}", id);
         return movieDbRepository.findById(id).map(DtoMapper::toDto).orElse(null);
     }
 
     public List<PersonEntity> getAllActors() {
+        log.debug("Getting all actors");
         var actorsSorted = personDbRepository.findActorsSortByCreated();
-        System.out.printf("There are %d sorted actors.\n", actorsSorted.size());
+        log.info("There are {} sorted actors", actorsSorted.size());
         return actorsSorted;
     }
 
     public List<PersonEntity> getAllPeople() {
+        log.debug("Getting all people");
         return personDbRepository.findAll();
     }
 
     public List<MovieEntity> getMoviesByActor(String actorId) {
+        log.debug("Getting movies by actor with id: {}", actorId);
         return movieDbRepository.findByActors_Id(actorId);
     }
 
     public List<MovieEntity> getFilteredMovies(String keyword) {
+        log.debug("Getting movies by keyword: {}", keyword);
         return movieDbRepository.findByKeyword(keyword).stream().toList();
     }
 
     public void saveAllMovies(Iterable<MovieEntity> movies) {
+        log.debug("Saving movies");
         movieDbRepository.saveAllAndFlush(movies);
     }
 
     public void setUpMovies() {
+        log.info("Setting up movies with hard-coded list");
         movieDbRepository.deleteAll();
         creatorDbRepository.deleteAll();
         personDbRepository.deleteAll();
@@ -176,50 +199,47 @@ public class MovieService {
     }
 
     private void assignFakeMovies() throws IOException {
-            List<MovieEntity> allMovies = fakeRepository.getAllMovies();
-            Set<CreatorEntity> allCreators = new HashSet<>();
-            Set<PersonEntity> allPeople = new HashSet<>();
-            Set<CompanyEntity> allCompanies = new HashSet<>();
-            allMovies.forEach(movie -> {
-                allCreators.addAll(movie.getCreators());
-                allPeople.addAll(movie.getActors());
-                allPeople.addAll(movie.getDirectors());
-                allPeople.addAll(movie.getCreators().stream().filter(PersonEntity.class::isInstance).map(c -> (PersonEntity)c).toList());
-                allCompanies.addAll(movie.getCreators().stream().filter(CompanyEntity.class::isInstance).map(c -> (CompanyEntity)c).toList());
-            });
+        log.info("Assigning fake movies");
+        List<MovieEntity> allMovies = fakeRepository.getAllMovies();
+        Set<CreatorEntity> allCreators = new HashSet<>();
+        Set<PersonEntity> allPeople = new HashSet<>();
+        Set<CompanyEntity> allCompanies = new HashSet<>();
+        allMovies.forEach(movie -> {
+            allCreators.addAll(movie.getCreators());
+            allPeople.addAll(movie.getActors());
+            allPeople.addAll(movie.getDirectors());
+            allPeople.addAll(movie.getCreators().stream().filter(PersonEntity.class::isInstance).map(c -> (PersonEntity) c).toList());
+            allCompanies.addAll(movie.getCreators().stream().filter(CompanyEntity.class::isInstance).map(c -> (CompanyEntity) c).toList());
+        });
 
-            creatorDbRepository.saveAllAndFlush(allCreators);
-            personDbRepository.saveAllAndFlush(allPeople);
-            companyDbRepository.saveAllAndFlush(allCompanies);
+        creatorDbRepository.saveAllAndFlush(allCreators);
+        personDbRepository.saveAllAndFlush(allPeople);
+        companyDbRepository.saveAllAndFlush(allCompanies);
 
-            for (MovieEntity movie : allMovies) {
-                if (movie.getYoutubeTrailer() != null) {
-                    movie.getYoutubeTrailer().setMovie(movie);
-                } else {
-                    System.out.println("WARNING NO TRAILER FOUND FOR MOVIE " + movie.getTitle());
-                }
+        for (MovieEntity movie : allMovies) {
+            if (movie.getYoutubeTrailer() != null)
+                movie.getYoutubeTrailer().setMovie(movie);
+            else
+                log.warn("No trailer found for movie {}-{}", movie.getId(), movie.getTitle());
 
-                Set<CreatorEntity> movieCreators = new HashSet<>();
-                Set<PersonEntity> movieActors = new HashSet<>();
-                Set<PersonEntity> movieDirectors = new HashSet<>();
+            Set<CreatorEntity> movieCreators = new HashSet<>();
+            Set<PersonEntity> movieActors = new HashSet<>();
+            Set<PersonEntity> movieDirectors = new HashSet<>();
 
-                movie.getCreators().forEach(creator ->
-                      creatorDbRepository.findById(creator.getId()).ifPresent(movieCreators::add));
+            movie.getCreators().forEach(creator -> creatorDbRepository.findById(creator.getId()).ifPresent(movieCreators::add));
 
-                movie.getActors().forEach(person ->
-                      personDbRepository.findById(person.getId()).ifPresent(movieActors::add));
+            movie.getActors().forEach(person -> personDbRepository.findById(person.getId()).ifPresent(movieActors::add));
 
-                movie.getDirectors().forEach(person ->
-                      personDbRepository.findById(person.getId()).ifPresent(movieDirectors::add));
+            movie.getDirectors().forEach(person -> personDbRepository.findById(person.getId()).ifPresent(movieDirectors::add));
 
-                movie.setCreators(movieCreators);
-                movie.setActors(movieActors);
-                movie.setDirectors(movieDirectors);
-            }
+            movie.setCreators(movieCreators);
+            movie.setActors(movieActors);
+            movie.setDirectors(movieDirectors);
+        }
 
-            movieDbRepository.saveAllAndFlush(allMovies);
+        movieDbRepository.saveAllAndFlush(allMovies);
 
-            System.out.printf("There are %d movies. %d creators, %d of which are person, and %d are companies.%n",
-                              movieDbRepository.count(), creatorDbRepository.count(), personDbRepository.count(), companyDbRepository.count());
+        log.info("There are {} movies. {} creators, {} of which are person, and {} are companies.%n",
+                 movieDbRepository.count(), creatorDbRepository.count(), personDbRepository.count(), companyDbRepository.count());
     }
 }

@@ -10,6 +10,7 @@ import hr.tvz.tim2.webserver.ordering.entities.OrderEntity;
 import hr.tvz.tim2.webserver.ordering.entities.OrderItemEntity;
 import hr.tvz.tim2.webserver.stock.StockService;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 import static hr.tvz.tim2.webserver.dto.DtoMapper.toDto;
 
+@Slf4j
 @Service
 public class OrderService {
     private final BasketService basketService;
@@ -41,10 +43,12 @@ public class OrderService {
         this.historyService = historyService;
         this.memberService = memberService;
         this.orderDbRepository = orderDbRepository;
+        log.debug("OrderService created");
     }
 
     @Transactional
     public OrderConfirmDto confirmOrder(String userName) {
+        log.debug("Confirming order for user: {}", userName);
         Long userId = basketService.getUserId(userName);
 
         boolean isUserBanned = memberService.isUserBanned(userId);
@@ -91,10 +95,13 @@ public class OrderService {
         orderConfirmDto.setIsReturned(false);
         orderConfirmDto.setItemIdList(order.getItemIdList().stream()
                                               .map(OrderItemEntity::getItemId).collect(Collectors.toSet()));
+
+        log.info("Order for user: {} confirmed. {}", userName, orderConfirmDto);
         return orderConfirmDto;
     }
 
     public OrderConfirmDto returnOrder(String userName) {
+        log.debug("Returning order for user: {}", userName);
         var userId = basketService.getUserId(userName);
         var orderOptional = orderDbRepository.findFirstByUserIdAndIsReturnedFalse(userId);
 

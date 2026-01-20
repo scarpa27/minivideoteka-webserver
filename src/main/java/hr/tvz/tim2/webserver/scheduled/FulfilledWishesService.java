@@ -2,10 +2,12 @@ package hr.tvz.tim2.webserver.scheduled;
 
 import hr.tvz.tim2.webserver.movie.repository.MovieDbRepository;
 import hr.tvz.tim2.webserver.wish.WishDbRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class FulfilledWishesService {
     private final WishDbRepository wishDbRepository;
@@ -22,6 +24,6 @@ public class FulfilledWishesService {
     public void markWishesAsFulfilled () {
         var ids = movieDbRepository.findAllIds();
         int updateCount = wishDbRepository.updateFulfilledWhereImdbId(ids);
-        System.out.printf("Updated %d wishes as fulfilled%n", updateCount);
+        log.debug("Updated {} wishes as fulfilled", updateCount);
     }
 }
