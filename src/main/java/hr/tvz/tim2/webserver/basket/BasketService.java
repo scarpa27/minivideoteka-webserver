@@ -77,6 +77,10 @@ public class BasketService {
     public void addItemToBasket(String userName, String movieId) throws Exception {
         log.debug("Adding item to basket for user: {}", userName);
         BasketEntity basket = getOrCreateActiveBasket(userName);
+        if (basket.getBasketItems().size() >= 3) {
+            log.info("Basket is full, informing user!");
+            throw new IllegalStateException("Basket is full! Maximum 3 items allowed per order.");
+        }
         addItemToBasket(basket, movieId);
     }
 
@@ -84,7 +88,7 @@ public class BasketService {
         log.debug("Adding item to basket: {}", basket.getBasketId());
         // If the movie is not already in the basket.
         if (basket.getBasketItems().stream().noneMatch(i -> i.getItemId().equals(movieId))) {
-            log.info("Adding item that doesn't exist.");
+            log.info("Adding new item to the basket.");
             try {
                 stockService.reserveMovie(movieId);
             }

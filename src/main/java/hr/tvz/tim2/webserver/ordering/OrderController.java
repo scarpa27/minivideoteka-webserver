@@ -1,7 +1,10 @@
 package hr.tvz.tim2.webserver.ordering;
 
 import hr.tvz.tim2.webserver.common.exception.ApiError;
+import hr.tvz.tim2.webserver.dto.MovieDto;
 import hr.tvz.tim2.webserver.dto.OrderConfirmDto;
+import hr.tvz.tim2.webserver.dto.RichOrderConfirmDto;
+import hr.tvz.tim2.webserver.movie.MovieService;
 import hr.tvz.tim2.webserver.ordering.services.HistoryService;
 import hr.tvz.tim2.webserver.ordering.services.OrderService;
 import hr.tvz.tim2.webserver.security.user.ApplicationUser;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -28,11 +32,14 @@ import java.util.List;
 public class OrderController {
     private final OrderService orderService;
     private final HistoryService historyService;
+    private final MovieService movieService;
 
     public OrderController(@Autowired OrderService orderService,
-                           @Autowired HistoryService historyService) {
+                           @Autowired HistoryService historyService,
+                           @Autowired MovieService movieService) {
         this.orderService = orderService;
         this.historyService = historyService;
+        this.movieService = movieService;
         log.debug("OrderController created");
     }
 
@@ -40,8 +47,25 @@ public class OrderController {
     public ResponseEntity<List<OrderConfirmDto>> getOrdersHistory(@AuthenticationPrincipal ApplicationUser user) {
         log.debug("Getting orders history for user: {}", user.getUsername());
         String username = user.getUsername();
-        var history = historyService.getOrdersHistory(username);
+        List<OrderConfirmDto> history = historyService.getOrdersHistory(username);
         return ResponseEntity.ok().body(history);
+    }
+
+    @GetMapping("/history/v2")
+    public ResponseEntity<List<RichOrderConfirmDto>> getOrdersHistoryWithMovieName(@AuthenticationPrincipal ApplicationUser user) {
+        log.debug("Getting orders history with movie names included for user: {}", user.getUsername());
+        String username = user.getUsername();
+        List<OrderConfirmDto> history = historyService.getOrdersHistory(username);
+        List<RichOrderConfirmDto> finalList = new ArrayList<>();
+        for (var dto : history) {
+            List<String> movieIds = dto.getItemIdList().stream().toList();
+            List<MovieDto> movies = movieService.getSpecificListDto(movieIds);
+
+            var rich = new RichOrderConfirmDto(dto, movies);
+            finalList.add(rich);
+        }
+
+        return ResponseEntity.ok().body(finalList);
     }
 
     @Operation(summary = "Ova putanja je prominila lokaciju!!!")
