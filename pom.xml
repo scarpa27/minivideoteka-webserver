@@ -10,9 +10,9 @@
 	</parent>
 	<groupId>hr.tvz.tim2</groupId>
 	<artifactId>webserver</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>webserver</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Backend for Rewind Time web app</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -54,6 +54,12 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.7.9</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>

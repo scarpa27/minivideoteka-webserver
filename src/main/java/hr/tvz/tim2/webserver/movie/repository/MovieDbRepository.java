@@ -8,26 +8,34 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Transactional
 public interface MovieDbRepository extends JpaRepository<MovieEntity, String> {
     @Query(value = """
-            
-            SELECT m.*
-            FROM MOVIE_ENTITY m
-                LEFT JOIN movie_creator_join mcj ON m.id = mcj.movie_id
-                LEFT JOIN CREATOR_ENTITY c ON mcj.creator_id = c.id
-            WHERE
-                LOWER(m.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                OR LOWER(m.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                OR LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            ORDER BY
-                CASE WHEN LOWER(m.title) LIKE LOWER(CONCAT('%', :keyword, '%')) THEN 1 ELSE 0 END DESC,
-                CASE WHEN LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) THEN 1 ELSE 0 END DESC,
-                CASE WHEN LOWER(m.description) LIKE LOWER(CONCAT('%', :keyword, '%')) THEN 1 ELSE 0 END DESC;
-            """, nativeQuery = true)
-    Set<MovieEntity> findByKeyword(@Param("keyword") String keyword);
+    SELECT m.*
+    FROM movie_entity m
+    WHERE
+      LOWER(m.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+      OR LOWER(m.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+      OR EXISTS (
+          SELECT 1
+          FROM movie_creator_join mcj
+          JOIN creator_entity c ON c.id = mcj.creator_id
+          WHERE mcj.movie_id = m.id
+            AND LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+      )
+    ORDER BY
+      CASE WHEN LOWER(m.title) LIKE LOWER(CONCAT('%', :keyword, '%')) THEN 1 ELSE 0 END DESC,
+      CASE WHEN EXISTS (
+          SELECT 1
+          FROM movie_creator_join mcj
+          JOIN creator_entity c ON c.id = mcj.creator_id
+          WHERE mcj.movie_id = m.id
+            AND LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+      ) THEN 1 ELSE 0 END DESC,
+      CASE WHEN LOWER(m.description) LIKE LOWER(CONCAT('%', :keyword, '%')) THEN 1 ELSE 0 END DESC
+""", nativeQuery = true)
+    List<MovieEntity> findByKeyword(@Param("keyword") String keyword);
 
     Optional<MovieEntity> findFirstById(String id);
 
