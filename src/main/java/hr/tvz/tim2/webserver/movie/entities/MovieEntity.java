@@ -2,19 +2,21 @@ package hr.tvz.tim2.webserver.movie.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import hr.tvz.tim2.webserver.review.ReviewEntity;
-import hr.tvz.tim2.webserver.stock.StockEntity;
 import hr.tvz.tim2.webserver.common.deserializer.CreatorDeserializer;
 import hr.tvz.tim2.webserver.common.deserializer.DateDeserializer;
 import hr.tvz.tim2.webserver.common.deserializer.DurationDeserializer;
 import hr.tvz.tim2.webserver.common.deserializer.MovieIdDeserializer;
+import hr.tvz.tim2.webserver.review.ReviewEntity;
+import hr.tvz.tim2.webserver.stock.StockEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.Duration;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -55,7 +57,7 @@ public class MovieEntity {
     private String title;
 
     @JsonProperty("datePublished") @JsonDeserialize(using = DateDeserializer.class)
-    private Date releaseDate;
+    private LocalDate releaseDate;
 
     @JsonProperty("image")
     private String coverImageUrl;
@@ -65,6 +67,15 @@ public class MovieEntity {
 
     @JsonProperty("description")
     private String description;
+
+    private BigDecimal rating;
+
+    @JsonProperty("aggregateRating")
+    public void setRating(JsonNode agg) {
+        this.rating = (agg != null && agg.hasNonNull("ratingValue"))
+                ? agg.get("ratingValue").decimalValue()
+                : null;
+    }
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(

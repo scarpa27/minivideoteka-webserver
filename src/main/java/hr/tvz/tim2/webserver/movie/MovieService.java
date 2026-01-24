@@ -2,6 +2,8 @@ package hr.tvz.tim2.webserver.movie;
 
 import hr.tvz.tim2.webserver.dto.DtoMapper;
 import hr.tvz.tim2.webserver.dto.MovieDto;
+import hr.tvz.tim2.webserver.movie.domain.MovieFilter;
+import hr.tvz.tim2.webserver.movie.domain.MovieSpecs;
 import hr.tvz.tim2.webserver.movie.entities.CompanyEntity;
 import hr.tvz.tim2.webserver.movie.entities.CreatorEntity;
 import hr.tvz.tim2.webserver.movie.entities.MovieEntity;
@@ -12,6 +14,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -176,6 +180,12 @@ public class MovieService {
     public List<MovieEntity> getFilteredMovies(String keyword) {
         log.debug("Getting movies by keyword: {}", keyword);
         return movieDbRepository.findByKeyword(keyword).stream().toList();
+    }
+
+    public Page<MovieDto> getMovies(MovieFilter filter, Pageable pageable) {
+        var spec = MovieSpecs.withFilter(filter);
+        return movieDbRepository.findAll(spec, pageable)
+                .map(DtoMapper::toDto);
     }
 
     public void saveAllMovies(Iterable<MovieEntity> movies) {

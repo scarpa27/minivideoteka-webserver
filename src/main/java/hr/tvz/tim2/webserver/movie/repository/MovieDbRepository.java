@@ -1,8 +1,11 @@
 package hr.tvz.tim2.webserver.movie.repository;
 
+import hr.tvz.tim2.webserver.movie.domain.MovieFilter;
 import hr.tvz.tim2.webserver.movie.entities.MovieEntity;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -10,7 +13,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Transactional
-public interface MovieDbRepository extends JpaRepository<MovieEntity, String> {
+public interface MovieDbRepository extends JpaRepository<MovieEntity, String>,
+                                           JpaSpecificationExecutor<MovieEntity> {
+    /**
+     * @deprecated There is a new endpoint that does the same thing using pagination, filtering, and sorting.<br>
+     *             See {@link hr.tvz.tim2.webserver.movie.domain.MovieSpecs}<br>
+     *             See {@link hr.tvz.tim2.webserver.movie.MovieController#getMovies(MovieFilter, Pageable)}
+     */
+    @Deprecated(since = "2026-01-24", forRemoval = false)
     @Query(value = """
     SELECT m.*
     FROM movie_entity m

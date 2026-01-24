@@ -8,17 +8,19 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Slf4j
-public class DateDeserializer extends JsonDeserializer<Date> {
+public class DateDeserializer extends JsonDeserializer<LocalDate> {
     @Override
-    public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+    public LocalDate deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         var text = jsonParser.getText();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
         try {
-            return formatter.parse(text);
+            Date date = formatter.parse(text);
+            return date.toInstant().atZone(formatter.getTimeZone().toZoneId()).toLocalDate();
         } catch (ParseException e) {
             log.error("Error while parsing date: {}", text);
         }

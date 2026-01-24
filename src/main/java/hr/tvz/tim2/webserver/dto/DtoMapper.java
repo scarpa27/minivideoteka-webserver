@@ -33,6 +33,7 @@ public class DtoMapper {
         dto.setDuration(entity.getDuration());
         dto.setDescription(entity.getDescription());
         dto.setYoutubeTrailer(getYoutubeTrailer(entity));
+        dto.setRating(entity.getRating());
 
         dto.setActors(entity.getActors().stream()
                               .map(a -> new MovieDto.CreatorDto(a.getId(), a.getName())).toList());

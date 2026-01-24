@@ -4,8 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.Duration;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -15,10 +16,11 @@ public class MovieDto {
     List<CreatorDto> actors;
     List<CreatorDto> creators;
     List<CreatorDto> directors;
-    Date releaseDate;
+    LocalDate releaseDate;
     String coverImageUrl;
     Duration duration;
     String description;
+    BigDecimal rating;
 
     YoutubeTrailer youtubeTrailer;
 

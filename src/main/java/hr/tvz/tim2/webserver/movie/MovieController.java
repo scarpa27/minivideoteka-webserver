@@ -4,12 +4,18 @@ import hr.tvz.tim2.webserver.common.exception.ApiError;
 import hr.tvz.tim2.webserver.dto.CreatorDto;
 import hr.tvz.tim2.webserver.dto.DtoMapper;
 import hr.tvz.tim2.webserver.dto.MovieDto;
+import hr.tvz.tim2.webserver.movie.domain.MovieFilter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +37,10 @@ public class MovieController {
         log.debug("MovieController created");
     }
 
+    /**
+     * @deprecated in favour of {@link MovieController#getMovies(MovieFilter, Pageable)}
+     */
+    @Deprecated(since = "2026-01-24", forRemoval = false)
     @GetMapping
     public ResponseEntity<List<MovieDto>> getAllMovies() {
         log.debug("Getting all movies");
@@ -89,6 +99,10 @@ public class MovieController {
         }
     }
 
+    /**
+     * @deprecated in favour of {@link MovieController#getMovies(MovieFilter, Pageable)}
+     */
+    @Deprecated(since = "2026-01-24", forRemoval = false)
     @GetMapping("byKeywords/{keywords}")
     public ResponseEntity<List<MovieDto>> getAllMoviesByKeywords(@PathVariable String keywords) {
         log.debug("Getting all movies by keywords: {}", keywords);
@@ -99,5 +113,19 @@ public class MovieController {
         catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GetMapping("pageable")
+    public ResponseEntity<PagedModel<MovieDto>> getMovies(@ModelAttribute MovieFilter filter,
+                                                          @PageableDefault(size = 20) Pageable pageable) {
+        int maxSize = 100;
+        if (pageable.getPageSize() > maxSize) {
+            pageable = PageRequest.of(pageable.getPageNumber(), maxSize, pageable.getSort());
+        }
+
+        Sort sort = pageable.getSort().and(Sort.by("id").ascending());
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        return ResponseEntity.ok(new PagedModel<>(movieService.getMovies(filter, pageable)));
     }
 }
